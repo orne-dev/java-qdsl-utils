@@ -1,0 +1,23 @@
+Orne.dev Querydsl utilities
+
+## Usage:
+
+```xml
+<project ...>
+...
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>${project.artifactId}</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    ...
+  <dependencies>
+...
+</project>
+```
+
+## Provides the next features:
+
+- [ ] Sample feature

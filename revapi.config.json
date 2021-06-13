@@ -1,0 +1,23 @@
+{
+  "revapi": {
+    "semver": {
+      "ignore": {
+        "enabled": true
+      }
+    },
+    "filter": {
+      "elements" : {
+        "exclude" : [
+          {
+            "matcher": "java",
+            "match": "@org.apiguardian.api.API(status != org.apiguardian.api.API.Status.STABLE) ^*;"
+          },
+          {
+            "matcher": "java",
+            "match": "@org.apiguardian.api.API(status != org.apiguardian.api.API.Status.MAINTAINED) ^*;"
+          }
+        ]
+      }
+    }
+  }
+}
