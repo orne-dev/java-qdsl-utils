@@ -1,6 +1,6 @@
 /*-
  * #%L
- * qdsl-utils
+ * Orne Querydsl Utils
  * %%
  * Copyright (C) 2021 Orne Developments
  * %%
@@ -22,8 +22,9 @@
 module dev.orne.qdsl {
     exports dev.orne.qdsl;
     requires org.slf4j;
-    requires org.apache.commons.lang3;
+    requires transitive org.apache.commons.lang3;
     requires transitive com.querydsl.core;
     requires static java.validation;
     requires static org.apiguardian.api;
+    requires static transitive commons.beanutils;
 }

@@ -8,15 +8,15 @@
     <relativePath />
   </parent>
 
-  <groupId>dev.orne.qdsl</groupId>
+  <groupId>dev.orne</groupId>
   <artifactId>qdsl-utils</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>qdsl-utils</name>
-  <description>Orne.dev Querydsl utilities</description>
+  <name>Orne Querydsl Utils</name>
+  <description>Orne utilities for Querydsl</description>
   <inceptionYear>2021</inceptionYear>
-  <url>http://orne-dev.github.io/java-qdsl-utils/</url>
+  <url>https://orne-dev.github.io/java-qdsl-utils/</url>
 
   <licenses>
     <license>
@@ -34,7 +34,7 @@
   </developers>
 
   <scm>
-    <url>http://github.com/orne-dev/qdsl-utils/tree/master</url>
+    <url>http://github.com/orne-dev/java-qdsl-utils/tree/master</url>
     <connection>scm:git:git://github.com/orne-dev/java-qdsl-utils.git</connection>
     <developerConnection>scm:git:ssh://github.com:orne-dev/java-qdsl-utils.git</developerConnection>
     <tag>HEAD</tag>
@@ -46,12 +46,13 @@
     <java.target.version>8</java.target.version>
     <license.licenseName>lgpl_v3</license.licenseName>
 
-    <sonar.projectKey>java-qdsl-utils</sonar.projectKey>
-
     <commons.lang.version>3.12.0</commons.lang.version>
-    <querydsl.version>5.0.0.M1</querydsl.version>
+    <querydsl.version>5.0.0</querydsl.version>
 
     <javax.validation.version>2.0.1.Final</javax.validation.version>
+    <commons.beanutils.version>1.9.4</commons.beanutils.version>
+
+    <sonar.projectKey>java-qdsl-utils</sonar.projectKey>
   </properties>
 
   <dependencies>
@@ -68,9 +69,13 @@
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
       <version>${querydsl.version}</version>
-      <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
@@ -81,6 +86,18 @@
       <groupId>org.apiguardian</groupId>
       <artifactId>apiguardian-api</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${commons.beanutils.version}</version>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

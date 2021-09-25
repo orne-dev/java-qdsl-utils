@@ -7,7 +7,7 @@ package dev.orne.qdsl;
 
 /*-
  * #%L
- * qdsl-utils
+ * Orne Querydsl Utils
  * %%
  * Copyright (C) 2021 Orne Developments
  * %%
