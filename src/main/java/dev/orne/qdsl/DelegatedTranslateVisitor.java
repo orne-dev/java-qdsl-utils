@@ -38,6 +38,7 @@ import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpression;
 import com.querydsl.core.types.Operation;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.ParamExpression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.SubQueryExpression;
@@ -185,6 +186,24 @@ extends TranslateVisitor {
         Expression<?> result = expr;
         for (final TranslateVisitor visitor : this.visitors) {
             result = result.accept(visitor, context);
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderSpecifier<?>[] visit(
+            final @NotNull OrderSpecifier<?> order,
+            final Context context) {
+        OrderSpecifier<?>[] result = new OrderSpecifier<?>[] { order };
+        for (final TranslateVisitor visitor : this.visitors) {
+            result = Arrays.asList(result)
+                    .parallelStream()
+                    .map(e -> visitor.visit(e, context))
+                    .flatMap(r -> Arrays.asList(r).stream())
+                    .toArray(OrderSpecifier<?>[]::new);
         }
         return result;
     }

@@ -35,6 +35,8 @@ import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpression;
 import com.querydsl.core.types.Operation;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.ParamExpression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.SubQueryExpression;
@@ -68,9 +70,12 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
     public @NotNull Expression<?> visit(
             final @NotNull FactoryExpression<?> expr,
             final Context context) {
-        return super.visit(expr, context);
+        return super.visit(expr, Context.PROJECTION);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public @NotNull Expression<?> visit(
             final @NotNull Operation<?> expr,
@@ -119,6 +124,61 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
     }
 
     /**
+     * Visits the specified order specifier, replacing if required.
+     * 
+     * @param order The order specifier
+     * @param context The visit context
+     * @return The resulting order specifiers
+     */
+    public OrderSpecifier<?>[] visit(
+            final @NotNull OrderSpecifier<?> order,
+            final Context context) {
+        final Expression<?> result = order.getTarget().accept(this, null);
+        if (result == order.getTarget()) {
+            return new OrderSpecifier<?>[] { order };
+        } else {
+            Validate.isInstanceOf(Comparable.class, result);
+            @SuppressWarnings("unchecked")
+            final Expression<? extends Comparable<?>> newTarget =
+                    (Expression<? extends Comparable<?>>) result;
+            return array(createOrderSpecifier(
+                    newTarget,
+                    order.getOrder(),
+                    order.getNullHandling()));
+        }
+    }
+
+    /**
+     * Creates a new typed order specifier.
+     * 
+     * @param <T> The target expression type
+     * @param target The target expression
+     * @param order The ordering direction
+     * @param nullHandling The behavior for order of null values
+     * @return The created order specifier
+     */
+    protected static <T extends Comparable<?>> OrderSpecifier<T> createOrderSpecifier(
+            final Expression<T> target,
+            final Order order,
+            final OrderSpecifier.NullHandling nullHandling) {
+        return new OrderSpecifier<>(
+                order,
+                target,
+                nullHandling);
+    }
+
+    /**
+     * Utility method for quickly create order specifier arrays.
+     * 
+     * @param orderSpecifiers The order specifiers
+     * @return The order specifiers array
+     */
+    protected static OrderSpecifier<?>[] array(
+            final OrderSpecifier<?>... orderSpecifiers) {
+        return orderSpecifiers;
+    }
+
+    /**
      * Visits the specified value assignments, replacing if required.
      * 
      * @param vexprs The value assignments
@@ -147,7 +207,50 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
     public @NotNull ValueAssigment<?>[] visit(
             final @NotNull ValueAssigment<?> vexpr,
             final Context context) {
-        return ValueAssigment.array(Validate.notNull(vexpr));
+        Validate.notNull(vexpr);
+        ValueAssigment<?> result = vexpr;
+        final Expression<?> newPath = vexpr.getPath().accept(this, Context.STORE);
+        final Expression<?> newValue = vexpr.getValue().accept(this, Context.STORE);
+        if (newPath != vexpr.getPath() || newValue != vexpr.getValue()) {
+            Validate.isInstanceOf(Path.class, newPath);
+            result = newValueAssigment((Path<?>) newPath, newValue);
+        }
+        return ValueAssigment.array(result);
+    }
+
+    /**
+     * Creates a new value assignment validating that the value is of a valid type.
+     * 
+     * @param <T> The path type
+     * @param path The target path
+     * @param value The value to assign
+     * @return The new value assignment
+     * @throws IllegalArgumentException If the value expression is not assignable to
+     * the target path type
+     */
+    protected static @NotNull <T> ValueAssigment<T> newValueAssigment(
+            final @NotNull Path<T> path,
+            final @NotNull Expression<?> value) {
+        return ValueAssigment.of(path, typed(value, path.getType()));
+    }
+
+    /**
+     * Verifies that the expression is assignable to the target type and
+     * returns the expression as a typed instance.
+     * 
+     * @param <T> The expected expression type
+     * @param expr The untyped expression
+     * @param type The expected expression type
+     * @return The typed expression
+     * @throws IllegalArgumentException If the expression is not assignable to
+     * the target type
+     */
+    @SuppressWarnings("unchecked")
+    protected static @NotNull <T> Expression<T> typed(
+            final @NotNull Expression<?> expr,
+            final @NotNull Class<T> type) {
+        Validate.isAssignableFrom(type, expr.getType());
+        return (Expression<T>) expr;
     }
 
     /**
@@ -158,20 +261,11 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
     public static enum Context {
         /** Expression is part of a query projection. */
         PROJECTION,
-        /** Expression is part of a query from directive. */
-        FROM,
         /** Expression is part of a predicate. */
         PREDICATE,
-        /** Expression is part of a operation argument. */
-        OPERATION_ARG,
         /** Expression is part of a query ordering directive. */
         ORDER,
-        /** Expression is part of a query group by directive. */
-        GROUP,
-        /** Expression is part of a query having directive. */
-        HAVING,
         /** Expression is part of a store operation (insert, update). */
-        STORE,
-        ;
+        STORE;
     }
 }

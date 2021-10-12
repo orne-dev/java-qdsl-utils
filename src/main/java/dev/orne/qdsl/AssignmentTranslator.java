@@ -37,12 +37,12 @@ import com.querydsl.core.types.dsl.Expressions;
  * Functional interface for assigned value translation methods.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-08
+ * @version 1.0, 2021-10
  * @param <S> The source value type
  * @since 0.1
  */
 @FunctionalInterface
-public interface AssigmentTranslator<S>
+public interface AssignmentTranslator<S>
 extends Function<Expression<S>, ValueAssigment<?>[]> {
 
     /**
@@ -53,7 +53,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      * @param target The target property path
      * @return The created assigned value translator
      */
-    static <T> AssigmentTranslator<T> identity(
+    static <T> AssignmentTranslator<T> identity(
             final @NotNull Path<T> target) {
         Validate.notNull(target);
         return e -> ValueAssigment.array(ValueAssigment.of(target, e));
@@ -90,13 +90,13 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      */
     static <S, T> ValueAssigment<?> toSingleValue(
             final @NotNull Path<T> target,
-            final @NotNull ValueTranslator<S, ? extends T> valueTranslator,
-            final @NotNull ExpressionTranslator<S, ? extends T> expressionTranslator,
+            final @NotNull ValueTranslator<S, T> valueTranslator,
+            final @NotNull ExpressionTranslator<S, T> expressionTranslator,
             final @NotNull Expression<S> valueExpr) {
         Validate.notNull(target);
         Validate.notNull(valueTranslator);
         Validate.notNull(expressionTranslator);
-        final Expression<? extends T> newValue;
+        final Expression<T> newValue;
         if (valueExpr instanceof Constant) {
             final S value = valueExpr.getType().cast(
                     ((Constant<?>) valueExpr).getConstant());
@@ -114,14 +114,34 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      * @param <S> The source value type
      * @param <T> The target value type
      * @param target The target property path
+     * @param expressionTranslator The expression translator
+     * @return The created assigned value translator
+     */
+    static <S, T> AssignmentTranslator<S> forPath(
+            final @NotNull Path<T> target,
+            final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
+        Validate.notNull(target);
+        Validate.notNull(expressionTranslator);
+        return e -> ValueAssigment.array(ValueAssigment.of(
+                target,
+                expressionTranslator.apply(e)));
+    }
+
+    /**
+     * Creates a new assigned value translator that converts the passed
+     * value to a single value to be assigned to the specified property path.
+     * 
+     * @param <S> The source value type
+     * @param <T> The target value type
+     * @param target The target property path
      * @param valueTranslator The value translator
      * @param expressionTranslator The expression translator
      * @return The created assigned value translator
      */
-    static <S, T> AssigmentTranslator<S> forPath(
+    static <S, T> AssignmentTranslator<S> forPath(
             final @NotNull Path<T> target,
-            final @NotNull ValueTranslator<S, ? extends T> valueTranslator,
-            final @NotNull ExpressionTranslator<S, ? extends T> expressionTranslator) {
+            final @NotNull ValueTranslator<S, T> valueTranslator,
+            final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
         Validate.notNull(target);
         Validate.notNull(valueTranslator);
         Validate.notNull(expressionTranslator);
@@ -131,4 +151,26 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
                 expressionTranslator,
                 e));
     }
+
+    /**
+     * Convert the specified simple translator to a complete translator.
+     * 
+     * @return A lambda that implements {@code AssigmentTranslator}
+     */
+    static <S> AssignmentTranslator<S> fromSimple(Simple<S> simple) {
+        return e -> ValueAssigment.array(simple.apply(e));
+    }
+
+    /**
+     * Functional interface for assigned value translation methods that
+     * translates to a single assignment.
+     * 
+     * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
+     * @version 1.0, 2021-10
+     * @param <S> The source value type
+     * @since 0.1
+     */
+    @FunctionalInterface
+    interface Simple<S>
+    extends Function<Expression<S>, ValueAssigment<?>> {}
 }

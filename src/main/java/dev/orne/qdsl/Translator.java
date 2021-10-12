@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
 
+import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
@@ -38,7 +39,7 @@ import com.querydsl.core.types.Predicate;
  * QueryDSL expression translator.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-07
+ * @version 1.0, 2021-09
  * @since 0.1
  */
 public class Translator
@@ -70,9 +71,35 @@ extends DelegatedTranslateVisitor {
      * 
      * @param visitors The delegated translators
      */
-    public static Translator of(
+    public static Translator with(
             final TranslateVisitor... visitors) {
         return new Translator(visitors);
+    }
+
+    /**
+     * Starts the creation of a expression translator for the specified source
+     * path.
+     * 
+     * @param <S> The source path type
+     * @param path The source path
+     * @return A builder, to chain configuration calls
+     */
+    public static <S> PathTranslator.TargetBuilder<S> fromPath(
+            final @NotNull Path<S> path) {
+        return PathTranslator.fromPath(path);
+    }
+
+    /**
+     * Starts the creation of a expression translator for the specified source
+     * entity path.
+     * 
+     * @param <S> The source entity path type
+     * @param path The source entity path
+     * @return A builder, to chain configuration calls
+     */
+    public static <S> EntityPathTranslator.TargetBuilder<S> fromEntity(
+            final @NotNull EntityPath<S> path) {
+        return EntityPathTranslator.fromPath(path);
     }
 
     /**
@@ -84,140 +111,24 @@ extends DelegatedTranslateVisitor {
      * @param target The target property path
      * @return The property path translator
      */
-    public static <V> PropertyPathTranslator<V, V> forProperty(
+    public static <V> PathTranslator<V> renamePath(
             final @NotNull Path<V> source,
             final @NotNull Path<V> target) {
-        return new PropertyPathTranslator<>(
-                source,
-                target,
-                target,
-                ValueTranslator.identity(),
-                ExpressionTranslator.identity(),
-                AssigmentTranslator.identity(target));
+        return PathTranslator.fromPath(source).toPath(target).build();
     }
 
     /**
-     * Creates a property path translator that translates source path
-     * references to the target path, converting the type of the relevant
-     * expressions.
-     * <p>
-     * Uses Apache BeanUtils converter to convert the values
-     * <p>
-     * Value assignment translation is created using
-     * {@link AssigmentTranslator#forPath(Path, ValueTranslator, ExpressionTranslator)}.
+     * Translates the specified query projection expressions if required.
      * 
-     * @param <S> The source property type
-     * @param <T> The target property type
-     * @param source The source property path
-     * @param target The target property path
-     * @param factory The query projections expression
-     * @param expressionTranslator The expression translator
-     * @return The property path translator
+     * @param expr The expressions to translate
+     * @return The resulting expressions, translated if required
      */
-    public static <S, T> PropertyPathTranslator<S, T> forProperty(
-            final @NotNull Path<S> source,
-            final @NotNull Path<T> target,
-            final @NotNull Expression<S> factory,
-            final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
-        return new PropertyPathTranslator<>(
-                source,
-                target,
-                factory,
-                ValueTranslator.beanUtilsBased(target.getType()),
-                expressionTranslator);
-    }
-
-    /**
-     * Creates a property path translator that translates source path
-     * references to the target path, converting the type of the relevant
-     * expressions.
-     * <p>
-     * Uses Apache BeanUtils converter to convert the values
-     * 
-     * @param <S> The source property type
-     * @param <T> The target expression type
-     * @param source The source property path
-     * @param target The target expression path
-     * @param factory The query projections expression
-     * @param expressionTranslator The expression translator
-     * @param assigmentTranslator The value assignment translator
-     * @return The property path translator
-     */
-    public static <S, T> PropertyPathTranslator<S, T> forProperty(
-            final @NotNull Path<S> source,
-            final @NotNull Expression<T> target,
-            final @NotNull Expression<S> factory,
-            final @NotNull ExpressionTranslator<S, T> expressionTranslator,
-            final @NotNull AssigmentTranslator<S> assigmentTranslator) {
-        return new PropertyPathTranslator<>(
-                source,
-                target,
-                factory,
-                ValueTranslator.beanUtilsBased(target.getType()),
-                expressionTranslator,
-                assigmentTranslator);
-    }
-
-    /**
-     * Creates a property path translator that translates source path
-     * references to the target path, converting the type of the relevant
-     * expressions.
-     * <p>
-     * Value assignment translation is created using
-     * {@link AssigmentTranslator#forPath(Path, ValueTranslator, ExpressionTranslator)}.
-     * 
-     * @param <S> The source property type
-     * @param <T> The target expression type
-     * @param source The source property path
-     * @param target The target expression path
-     * @param factory The query projections expression
-     * @param valueTranslator The value translator
-     * @param expressionTranslator The expression translator
-     * @return The property path translator
-     */
-    public static <S, T> PropertyPathTranslator<S, T> forProperty(
-            final @NotNull Path<S> source,
-            final @NotNull Path<T> target,
-            final @NotNull Expression<S> factory,
-            final @NotNull ValueTranslator<S, T> valueTranslator,
-            final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
-        return new PropertyPathTranslator<>(
-                source,
-                target,
-                factory,
-                valueTranslator,
-                expressionTranslator);
-    }
-
-    /**
-     * Creates a property path translator that translates source path
-     * references to the target path, converting the type of the relevant
-     * expressions.
-     * 
-     * @param <S> The source property type
-     * @param <T> The target expression type
-     * @param source The source property path
-     * @param target The target expression path
-     * @param factory The query projections expression
-     * @param valueTranslator The value translator
-     * @param expressionTranslator The expression translator
-     * @param assigmentTranslator The value assignment translator
-     * @return The property path translator
-     */
-    public static <S, T> PropertyPathTranslator<S, T> forProperty(
-            final @NotNull Path<S> source,
-            final @NotNull Expression<T> target,
-            final @NotNull Expression<S> factory,
-            final @NotNull ValueTranslator<S, T> valueTranslator,
-            final @NotNull ExpressionTranslator<S, T> expressionTranslator,
-            final @NotNull AssigmentTranslator<S> assigmentTranslator) {
-        return new PropertyPathTranslator<>(
-                source,
-                target,
-                factory,
-                valueTranslator,
-                expressionTranslator,
-                assigmentTranslator);
+    public @NotNull Expression<?>[] translateProjections(
+            final @NotNull Expression<?>... o) {
+        return Arrays.asList(o)
+                .parallelStream()
+                .map(this::translateProjection)
+                .toArray(Expression<?>[]::new);
     }
 
     /**
@@ -228,9 +139,10 @@ extends DelegatedTranslateVisitor {
      * @return The resulting expression, translated if required
      */
     @SuppressWarnings("unchecked")
-    public <U> Expression<U> translateProjection(
+    public @NotNull <U> Expression<U> translateProjection(
             final Expression<U> expr) {
         final Expression<?> result = expr.accept(this, Context.PROJECTION);
+        Validate.notNull(result);
         Validate.isTrue(expr.getType().isAssignableFrom(result.getType()));
         return (Expression<U>) result;
     }
@@ -241,7 +153,7 @@ extends DelegatedTranslateVisitor {
      * @param expr The expressions to translate
      * @return The resulting expressions, translated if required
      */
-    public Predicate[] translatePredicates(
+    public @NotNull Predicate[] translatePredicates(
             final @NotNull Predicate... o) {
         return Arrays.asList(o)
                 .parallelStream()
@@ -255,9 +167,24 @@ extends DelegatedTranslateVisitor {
      * @param expr The expression to translate
      * @return The resulting expression, translated if required
      */
-    public Predicate translatePredicate(
+    public @NotNull Predicate translatePredicate(
             final @NotNull Predicate expr) {
         return (Predicate) expr.accept(this, Context.PREDICATE);
+    }
+
+    /**
+     * Translates the specified order specifiers if required.
+     * 
+     * @param orders The order specifiers to translate
+     * @return The resulting order specifiers, translated if required
+     */
+    public @NotNull OrderSpecifier<?>[] translateOrderSpecifiers(
+            final @NotNull OrderSpecifier<?>... orders) {
+        return Arrays.asList(orders)
+                .parallelStream()
+                .map(this::translateOrderSpecifier)
+                .flatMap(r -> Arrays.asList(r).stream())
+                .toArray(OrderSpecifier<?>[]::new);
     }
 
     /**
@@ -266,13 +193,9 @@ extends DelegatedTranslateVisitor {
      * @param order The order specifier to translate
      * @return The resulting order specifier, translated if required
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public OrderSpecifier<?> translateOrderSpecifier(
+    public @NotNull OrderSpecifier<?>[] translateOrderSpecifier(
             final @NotNull OrderSpecifier<?> order) {
-        return new OrderSpecifier<>(
-                order.getOrder(),
-                (Expression<? extends Comparable>) order.getTarget().accept(this, null),
-                order.getNullHandling());
+        return this.visit(order, Context.ORDER);
     }
 
     /**
@@ -281,7 +204,7 @@ extends DelegatedTranslateVisitor {
      * @param assigments The value assignments to translate
      * @return The resulting value assignments, translated if required
      */
-    public ValueAssigment<?>[] translateAssigments(
+    public @NotNull ValueAssigment<?>[] translateAssigments(
             final @NotNull ValueAssigment<?>... assigments) {
         return Arrays.asList(assigments)
                 .parallelStream()
@@ -296,7 +219,7 @@ extends DelegatedTranslateVisitor {
      * @param assigment The value assignment to translate
      * @return The resulting value assignments, translated if required
      */
-    public ValueAssigment<?>[] translateAssigment(
+    public @NotNull ValueAssigment<?>[] translateAssigment(
             final @NotNull ValueAssigment<?> assigment) {
         return assigment.accept(this, Context.STORE);
     }

@@ -38,7 +38,7 @@ import dev.orne.qdsl.TranslateVisitor.Context;
  * Value assignment bean for store (create, update) operations.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-08
+ * @version 1.0, 2021-09
  * @param <V> The value type
  * @since 0.1
  */
@@ -71,12 +71,10 @@ public class ValueAssigment<V> {
      * @param value The value to be assigned
      * @return The created instance
      */
-    public static <V> @NotNull ValueAssigment<V> of(
+    public static @NotNull <V> ValueAssigment<V> of(
             final @NotNull Path<V> path,
             final V value) {
-        return new ValueAssigment<V>(
-                path,
-                Expressions.constant(value));
+        return of(path, Expressions.constant(value));
     }
 
     /**
@@ -87,7 +85,7 @@ public class ValueAssigment<V> {
      * @param value The value to be assigned
      * @return The created instance
      */
-    public static <V> @NotNull ValueAssigment<V> of(
+    public static @NotNull <V> ValueAssigment<V> of(
             final @NotNull Path<V> path,
             final @NotNull Expression<? extends V> value) {
         return new ValueAssigment<V>(path, value);

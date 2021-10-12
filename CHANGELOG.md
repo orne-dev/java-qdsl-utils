@@ -10,6 +10,7 @@
     01. Added `dev.orne.qdsl.ValueAssigment` class.
     01. Added `dev.orne.qdsl.AssigmentTranslator` interface.
     01. Added `dev.orne.qdsl.TranslateVisitor` class.
+    01. Added `dev.orne.qdsl.AbstractPathTranslator` class.
     01. Added `dev.orne.qdsl.PropertyPathTranslator` class.
     01. Added `dev.orne.qdsl.DelegatedTranslateVisitor` class.
     01. Added `dev.orne.qdsl.Translator` class.

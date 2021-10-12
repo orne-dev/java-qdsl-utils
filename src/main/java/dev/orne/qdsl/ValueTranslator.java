@@ -36,7 +36,7 @@ import org.apache.commons.lang3.Validate;
  * Functional interface for value translation methods.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-08
+ * @version 1.0, 2021-09
  * @param <S> The source value type
  * @param <T> The target value type
  * @since 0.1
