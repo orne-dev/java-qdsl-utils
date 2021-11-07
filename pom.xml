@@ -3,7 +3,7 @@
 
   <parent>
     <groupId>dev.orne</groupId>
-    <artifactId>java-module-root-pom</artifactId>
+    <artifactId>java-root-pom</artifactId>
     <version>0.4.0-SNAPSHOT</version>
     <relativePath />
   </parent>
@@ -41,9 +41,8 @@
   </scm>
 
   <properties>
-    <java.version>11</java.version>
-    <java.module.version>9</java.module.version>
-    <java.target.version>8</java.target.version>
+    <java.version>8</java.version>
+    <java.module.name>dev.orne.qdsl</java.module.name>
     <license.licenseName>lgpl_v3</license.licenseName>
 
     <commons.lang.version>3.12.0</commons.lang.version>
