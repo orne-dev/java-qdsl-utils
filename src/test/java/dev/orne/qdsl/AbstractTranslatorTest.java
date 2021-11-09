@@ -110,9 +110,9 @@ public abstract class AbstractTranslatorTest {
      * @param expr The value assignment to translate
      */
     protected void assertAssigmentTranslation(
-            final ValueAssigment<?>[] expected,
-            final @NotNull ValueAssigment<?> expr) {
-        assertArrayEquals(expected, getTranslator().translateAssigment(expr));
+            final ValueAssignments expected,
+            final @NotNull ValueAssignment<?> expr) {
+        assertEquals(expected, getTranslator().translateAssigment(expr));
     }
 
     /**
@@ -123,8 +123,8 @@ public abstract class AbstractTranslatorTest {
      * @param expr The value assignments to translate
      */
     protected void assertAssigmentTranslation(
-            final ValueAssigment<?>[] expected,
-            final @NotNull ValueAssigment<?>... exprs) {
-        assertArrayEquals(expected, getTranslator().translateAssigments(exprs));
+            final ValueAssignments expected,
+            final @NotNull ValueAssignment<?>... exprs) {
+        assertEquals(expected, getTranslator().translateAssigments(exprs));
     }
 }

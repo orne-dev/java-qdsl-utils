@@ -22,10 +22,6 @@ package dev.orne.qdsl;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
@@ -185,16 +181,16 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
      * @param context The visit context
      * @return The resulting value assignments
      */
-    public @NotNull ValueAssigment<?>[] visit(
-            final @NotNull ValueAssigment<?>[] vexprs,
+    public @NotNull ValueAssignments visit(
+            final @NotNull ValueAssignment<?>[] vexprs,
             final Context context) {
         Validate.notNull(vexprs);
         Validate.noNullElements(vexprs);
-        final List<ValueAssigment<?>> result = new ArrayList<>(vexprs.length);
-        for (final ValueAssigment<?> vexpr : vexprs) {
-            result.addAll(Arrays.asList(vexpr.accept(this, context)));
+        final ValueAssignments result = new ValueAssignments(vexprs.length);
+        for (final ValueAssignment<?> vexpr : vexprs) {
+            result.addAll(vexpr.accept(this, context));
         }
-        return ValueAssigment.array(result);
+        return result;
     }
 
     /**
@@ -204,18 +200,18 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
      * @param context The visit context
      * @return The resulting value assignments
      */
-    public @NotNull ValueAssigment<?>[] visit(
-            final @NotNull ValueAssigment<?> vexpr,
+    public @NotNull ValueAssignments visit(
+            final @NotNull ValueAssignment<?> vexpr,
             final Context context) {
         Validate.notNull(vexpr);
-        ValueAssigment<?> result = vexpr;
+        ValueAssignment<?> result = vexpr;
         final Expression<?> newPath = vexpr.getPath().accept(this, Context.STORE);
         final Expression<?> newValue = vexpr.getValue().accept(this, Context.STORE);
         if (newPath != vexpr.getPath() || newValue != vexpr.getValue()) {
             Validate.isInstanceOf(Path.class, newPath);
             result = newValueAssigment((Path<?>) newPath, newValue);
         }
-        return ValueAssigment.array(result);
+        return ValueAssignments.of(result);
     }
 
     /**
@@ -228,10 +224,10 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
      * @throws IllegalArgumentException If the value expression is not assignable to
      * the target path type
      */
-    protected static @NotNull <T> ValueAssigment<T> newValueAssigment(
+    protected static @NotNull <T> ValueAssignment<T> newValueAssigment(
             final @NotNull Path<T> path,
             final @NotNull Expression<?> value) {
-        return ValueAssigment.of(path, typed(value, path.getType()));
+        return ValueAssignment.of(path, typed(value, path.getType()));
     }
 
     /**

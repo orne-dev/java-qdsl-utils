@@ -43,7 +43,7 @@ import com.querydsl.core.types.dsl.Expressions;
  */
 @FunctionalInterface
 public interface AssignmentTranslator<S>
-extends Function<Expression<S>, ValueAssigment<?>[]> {
+extends Function<Expression<S>, ValueAssignments> {
 
     /**
      * Creates a new identity assigned value translator that assigns the passed
@@ -56,7 +56,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
     static <T> AssignmentTranslator<T> identity(
             final @NotNull Path<T> target) {
         Validate.notNull(target);
-        return e -> ValueAssigment.array(ValueAssigment.of(target, e));
+        return e -> ValueAssignments.of(ValueAssignment.of(target, e));
     }
 
     /**
@@ -88,7 +88,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      * @param valueExpr The assigned value expression
      * @return The value assignment
      */
-    static <S, T> ValueAssigment<?> toSingleValue(
+    static <S, T> ValueAssignment<?> toSingleValue(
             final @NotNull Path<T> target,
             final @NotNull ValueTranslator<S, T> valueTranslator,
             final @NotNull ExpressionTranslator<S, T> expressionTranslator,
@@ -104,7 +104,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
         } else {
             newValue = expressionTranslator.apply(valueExpr);
         }
-        return ValueAssigment.of(target, newValue);
+        return ValueAssignment.of(target, newValue);
     }
 
     /**
@@ -122,7 +122,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
             final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
         Validate.notNull(target);
         Validate.notNull(expressionTranslator);
-        return e -> ValueAssigment.array(ValueAssigment.of(
+        return e -> ValueAssignments.of(ValueAssignment.of(
                 target,
                 expressionTranslator.apply(e)));
     }
@@ -145,7 +145,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
         Validate.notNull(target);
         Validate.notNull(valueTranslator);
         Validate.notNull(expressionTranslator);
-        return e -> ValueAssigment.array(toSingleValue(
+        return e -> ValueAssignments.of(toSingleValue(
                 target,
                 valueTranslator,
                 expressionTranslator,
@@ -158,7 +158,7 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      * @return A lambda that implements {@code AssigmentTranslator}
      */
     static <S> AssignmentTranslator<S> fromSimple(Simple<S> simple) {
-        return e -> ValueAssigment.array(simple.apply(e));
+        return e -> ValueAssignments.of(simple.apply(e));
     }
 
     /**
@@ -172,5 +172,5 @@ extends Function<Expression<S>, ValueAssigment<?>[]> {
      */
     @FunctionalInterface
     interface Simple<S>
-    extends Function<Expression<S>, ValueAssigment<?>> {}
+    extends Function<Expression<S>, ValueAssignment<?>> {}
 }

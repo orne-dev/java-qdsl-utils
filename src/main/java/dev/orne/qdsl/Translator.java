@@ -204,13 +204,25 @@ extends DelegatedTranslateVisitor {
      * @param assigments The value assignments to translate
      * @return The resulting value assignments, translated if required
      */
-    public @NotNull ValueAssigment<?>[] translateAssigments(
-            final @NotNull ValueAssigment<?>... assigments) {
-        return Arrays.asList(assigments)
-                .parallelStream()
+    public @NotNull ValueAssignments translateAssigments(
+            final @NotNull ValueAssignment<?>... assigments) {
+        return translateAssigments(ValueAssignments.of(assigments));
+    }
+
+    /**
+     * Translates the specified value assignments if required.
+     * 
+     * @param assigments The value assignments to translate
+     * @return The resulting value assignments, translated if required
+     */
+    public @NotNull ValueAssignments translateAssigments(
+            final @NotNull ValueAssignments assigments) {
+        return assigments.parallelStream()
                 .map(this::translateAssigment)
-                .flatMap(r -> Arrays.asList(r).stream())
-                .toArray(ValueAssigment<?>[]::new);
+                .collect(
+                    ValueAssignments::new,
+                    ValueAssignments::addAll,
+                    ValueAssignments::addAll);
     }
 
     /**
@@ -219,8 +231,8 @@ extends DelegatedTranslateVisitor {
      * @param assigment The value assignment to translate
      * @return The resulting value assignments, translated if required
      */
-    public @NotNull ValueAssigment<?>[] translateAssigment(
-            final @NotNull ValueAssigment<?> assigment) {
+    public @NotNull ValueAssignments translateAssigment(
+            final @NotNull ValueAssignment<?> assigment) {
         return assigment.accept(this, Context.STORE);
     }
 }

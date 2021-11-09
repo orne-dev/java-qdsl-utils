@@ -22,12 +22,15 @@ package dev.orne.qdsl;
  * #L%
  */
 
-import java.util.Collection;
-
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.Expressions;
@@ -42,7 +45,7 @@ import dev.orne.qdsl.TranslateVisitor.Context;
  * @param <V> The value type
  * @since 0.1
  */
-public class ValueAssigment<V> {
+public class ValueAssignment<V> {
 
     /** The path of the property to assign. */
     private final @NotNull Path<V> path;
@@ -55,7 +58,7 @@ public class ValueAssigment<V> {
      * @param path The path of the property to assign
      * @param value The value to be assigned
      */
-    protected ValueAssigment(
+    protected ValueAssignment(
             final @NotNull Path<V> path,
             final Expression<? extends V> value) {
         super();
@@ -71,10 +74,10 @@ public class ValueAssigment<V> {
      * @param value The value to be assigned
      * @return The created instance
      */
-    public static @NotNull <V> ValueAssigment<V> of(
+    public static @NotNull <V> ValueAssignment<V> of(
             final @NotNull Path<V> path,
             final V value) {
-        return of(path, Expressions.constant(value));
+        return of(path, value == null ? null : Expressions.constant(value));
     }
 
     /**
@@ -85,41 +88,10 @@ public class ValueAssigment<V> {
      * @param value The value to be assigned
      * @return The created instance
      */
-    public static @NotNull <V> ValueAssigment<V> of(
+    public static @NotNull <V> ValueAssignment<V> of(
             final @NotNull Path<V> path,
-            final @NotNull Expression<? extends V> value) {
-        return new ValueAssigment<V>(path, value);
-    }
-
-    /**
-     * Creates a new array with the specified value assignments.
-     * <p>
-     * To be passed to {@code Translator} and returned by
-     * {@code TranslateVisitor}.
-     * 
-     * @param assignments The assignments of the array
-     * @return The assignments array
-     */
-    public static @NotNull ValueAssigment<?>[] array(
-            final @NotNull ValueAssigment<?>... assignments) {
-        Validate.notNull(assignments);
-        return assignments;
-    }
-
-    /**
-     * Creates a new array with the specified value assignments.
-     * <p>
-     * To be passed to {@code Translator} and returned by
-     * {@code TranslateVisitor}.
-     * 
-     * @param assignments The assignments of the array
-     * @return The assignments array
-     */
-    public static @NotNull ValueAssigment<?>[] array(
-            final Collection<ValueAssigment<?>> assignments) {
-        return assignments == null ?
-                new ValueAssigment<?>[0] :
-                assignments.toArray(new ValueAssigment<?>[assignments.size()]);
+            final Expression<? extends V> value) {
+        return new ValueAssignment<V>(path, value);
     }
 
     /**
@@ -136,7 +108,7 @@ public class ValueAssigment<V> {
      * 
      * @return The value to be assigned
      */
-    public @NotNull Expression<? extends V> getValue() {
+    public Expression<? extends V> getValue() {
         return this.value;
     }
 
@@ -147,9 +119,61 @@ public class ValueAssigment<V> {
      * @param context The context of visit
      * @return The result of the visit
      */
-    public @NotNull ValueAssigment<?>[] accept(
+    public @NotNull ValueAssignments accept(
             final @NotNull TranslateVisitor visitor,
             final Context context) {
         return visitor.visit(this, context);
+    }
+
+    /**
+     * Applies this value assignment to the specified storage clause (INSERT,
+     * UPDATE).
+     * 
+     * @param <C> The type of the storage clause
+     * @param clause The storage clause
+     * @return The storage clause
+     */
+    public @NotNull <C extends StoreClause<? extends C>> C apply(
+            final @NotNull C clause) {
+        if (this.getValue() == null) {
+            clause.setNull(this.getPath());
+        } else {
+            clause.set(this.getPath(), this.getValue());
+        }
+        return clause;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(this.path)
+                .append(this.value)
+                .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        final ValueAssignment<?> other = (ValueAssignment<?>) obj;
+        return new EqualsBuilder()
+                .append(this.path, other.path)
+                .append(this.value, other.value)
+                .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

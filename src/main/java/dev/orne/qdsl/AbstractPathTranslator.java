@@ -275,8 +275,8 @@ extends TranslateVisitor {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull ValueAssigment<?>[] visit(
-            final @NotNull ValueAssigment<?> vexpr,
+    public @NotNull ValueAssignments visit(
+            final @NotNull ValueAssignment<?> vexpr,
             final Context context) {
         if (isSource(vexpr.getPath())) {
             @SuppressWarnings("unchecked")

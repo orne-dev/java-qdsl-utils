@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 
@@ -212,16 +210,18 @@ extends TranslateVisitor {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull ValueAssigment<?>[] visit(
-            final @NotNull ValueAssigment<?> vexpr,
+    public @NotNull ValueAssignments visit(
+            final @NotNull ValueAssignment<?> vexpr,
             final Context context) {
-        List<ValueAssigment<?>> result = Arrays.asList(vexpr);
+        ValueAssignments result = ValueAssignments.of(vexpr);
         for (final TranslateVisitor visitor : this.visitors) {
             result = result.parallelStream()
                 .map((p) -> visitor.visit(p, context))
-                .flatMap((p) -> Stream.of(p))
-                .collect(Collectors.toList());
+                .collect(
+                        ValueAssignments::new,
+                        ValueAssignments::addAll,
+                        ValueAssignments::addAll);
         }
-        return ValueAssigment.array(result);
+        return result;
     }
 }
