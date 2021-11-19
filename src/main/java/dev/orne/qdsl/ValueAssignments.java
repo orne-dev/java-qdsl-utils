@@ -283,7 +283,7 @@ implements Cloneable,
     public <T> Expression<T> add(
            final @NotNull Path<T> path,
            final Expression<? extends T> value) {
-        Validate.notNull(value);
+        Validate.notNull(path);
         @SuppressWarnings("unchecked")
         final Expression<T> oldValue = (Expression<T>) this.assignments.put(path, value);
         return oldValue;
