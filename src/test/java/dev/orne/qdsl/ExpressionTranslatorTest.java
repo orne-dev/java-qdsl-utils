@@ -38,269 +38,382 @@ import com.querydsl.core.types.dsl.PathBuilder;
  * Unit tests for {@code ExpressionTranslator}.
  *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2022-01
+ * @version 1.0, 2021-11
  * @since 0.1
  * @see ExpressionTranslator
  */
 @Tag("ut")
-public class ExpressionTranslatorTest {
+class ExpressionTranslatorTest {
 
-    private static final PathBuilder<Object> BUILDER =
-            new PathBuilder<Object>(Object.class, "builder");
+    private final static PathBuilder<Object> bean =
+            new PathBuilder<>(Object.class, "bean");
 
+    /**
+     * Test for {@link ExpressionTranslator#identity()}.
+     */
     @Test
-    void testIdentity() {
-        final ExpressionTranslator<Object, Object> translator =
-                ExpressionTranslator.identity();
-        final Expression<Object> value = BUILDER.getSimple("value", Object.class);
-        final Expression<Object> result = translator.apply(value);
+    void identityTest() {
+        final ExpressionTranslator<Object, Object> translator = ExpressionTranslator.identity();
+        assertNotNull(translator);
+        final Expression<Object> value = bean.getSimple("prop", Object.class);
+        final Expression<?> result = translator.apply(value);
         assertNotNull(result);
         assertSame(value, result);
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#booleanToString(String, String)}.
+     */
     @Test
-    void testStringToBoolean_Constant() {
-        final String trueValue = "trueValue";
-        final ExpressionTranslator<String, Boolean> translator =
-                ExpressionTranslator.stringToBoolean(trueValue);
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void booleanToStringConstantTest() {
+        final String trueValue = "someStr";
+        final String falseValue = "negated";
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString((String) null, falseValue));
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString(trueValue, (String) null));
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString((String) null, (String) null));
+        final ExpressionTranslator<Boolean, String> translator = ExpressionTranslator.booleanToString(trueValue, falseValue);
+        assertNotNull(translator);
+        final Expression<Boolean> value = bean.getBoolean("prop");
+        assertEquals(
+                Expressions.asBoolean(value)
+                    .when(true).then(trueValue)
+                    .otherwise(falseValue),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#booleanToString(Expression, Expression)}.
+     */
+    @Test
+    void booleanToStringExpressionTest() {
+        final Expression<String> trueValue = bean.getString("trueValue");
+        final Expression<String> falseValue = bean.getString("falseValue");
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString((Expression<String>) null, falseValue));
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString(trueValue, (Expression<String>) null));
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.booleanToString((Expression<String>) null, (Expression<String>) null));
+        final ExpressionTranslator<Boolean, String> translator = ExpressionTranslator.booleanToString(trueValue, falseValue);
+        assertNotNull(translator);
+        final Expression<Boolean> value = bean.getBoolean("prop");
+        assertEquals(
+                Expressions.asBoolean(value)
+                    .when(true).then(trueValue)
+                    .otherwise(falseValue),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#stringToBoolean(String)}.
+     */
+    @Test
+    void stringToBooleanConstantTest() {
+        final String trueValue = "someStr";
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.stringToBoolean((String) null));
+        final ExpressionTranslator<String, Boolean> translator = ExpressionTranslator.stringToBoolean(trueValue);
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).equalsIgnoreCase(trueValue),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#stringToBoolean(String)}.
+     */
     @Test
-    void testStringToBoolean_Expression() {
-        final Expression<String> trueValue = BUILDER.get("trueValue", String.class);
-        final ExpressionTranslator<String, Boolean> translator =
-                ExpressionTranslator.stringToBoolean(trueValue);
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void stringToBooleanExpressionTest() {
+        final Expression<String> trueValue = bean.getString("trueValue");
+        assertThrows(NullPointerException.class, () -> ExpressionTranslator.stringToBoolean((Expression<String>) null));
+        final ExpressionTranslator<String, Boolean> translator = ExpressionTranslator.stringToBoolean(trueValue);
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).equalsIgnoreCase(trueValue),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#BOOL_TO_STR}.
+     */
     @Test
-    void testBooleanToString_Constant() {
-        final String trueValue = "trueValue";
-        final String falseValue = "falseValue";
-        final ExpressionTranslator<Boolean, String> translator =
-                ExpressionTranslator.booleanToString(trueValue, falseValue);
-        final Expression<Boolean> value = BUILDER.get("value", Boolean.class);
+    void boolToStrTest() {
+        final ExpressionTranslator<Boolean, String> translator = ExpressionTranslator.BOOL_TO_STR;
+        assertNotNull(translator);
+        final Expression<Boolean> value = bean.getBoolean("prop");
         assertEquals(
-                Expressions.asBoolean(value).when(true).then(trueValue).otherwise(falseValue),
+                Expressions.asBoolean(value)
+                    .when(true).then("true")
+                    .otherwise("false"),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_BOOL}.
+     */
     @Test
-    void testBooleanToString_Expression() {
-        final Expression<String> trueValue = BUILDER.get("trueValue", String.class);
-        final Expression<String> falseValue = BUILDER.get("falseValue", String.class);
-        final ExpressionTranslator<Boolean, String> translator =
-                ExpressionTranslator.booleanToString(trueValue, falseValue);
-        final Expression<Boolean> value = BUILDER.get("value", Boolean.class);
-        assertEquals(
-                Expressions.asBoolean(value).when(true).then(trueValue).otherwise(falseValue),
-                translator.apply(value));
-    }
-
-    @Test
-    void testStringToNumber() {
-        final ExpressionTranslator<String, Long> translator =
-                ExpressionTranslator.stringToNumber(Long.class);
-        final Expression<String> value = BUILDER.get("value", String.class);
-        assertEquals(
-                Expressions.asString(value).castToNum(Long.class),
-                translator.apply(value));
-    }
-
-    @Test
-    void testNumberToString() {
-        final ExpressionTranslator<Long, String> translator =
-                ExpressionTranslator.numberToString(Long.class);
-        final Expression<Long> value = BUILDER.get("value", Long.class);
-        assertEquals(
-                Expressions.asNumber(value).stringValue(),
-                translator.apply(value));
-    }
-
-    @Test
-    void testSTR_TO_BOOL() {
-        final ExpressionTranslator<String, Boolean> translator =
-                ExpressionTranslator.STR_TO_BOOL;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToBoolTest() {
+        final ExpressionTranslator<String, Boolean> translator = ExpressionTranslator.STR_TO_BOOL;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).equalsIgnoreCase("true"),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#numberToString(Class)}.
+     */
     @Test
-    void testBOOL_TO_STR() {
-        final ExpressionTranslator<Boolean, String> translator =
-                ExpressionTranslator.BOOL_TO_STR;
-        final Expression<Boolean> value = BUILDER.get("value", Boolean.class);
-        assertEquals(
-                Expressions.asBoolean(value).when(true).then("true").otherwise("false"),
-                translator.apply(value));
-    }
-
-    @Test
-    void testSTR_TO_BYTE() {
-        final ExpressionTranslator<String, Byte> translator =
-                ExpressionTranslator.STR_TO_BYTE;
-        final Expression<String> value = BUILDER.get("value", String.class);
-        assertEquals(
-                Expressions.asString(value).castToNum(Byte.class),
-                translator.apply(value));
-    }
-
-    @Test
-    void testBYTE_TO_STR() {
-        final ExpressionTranslator<Byte, String> translator =
-                ExpressionTranslator.BYTE_TO_STR;
-        final Expression<Byte> value = BUILDER.get("value", Byte.class);
+    void numberToStringTest() {
+        final ExpressionTranslator<Integer, String> translator = ExpressionTranslator.numberToString(Integer.class);
+        assertNotNull(translator);
+        final Expression<Integer> value = bean.getNumber("prop", Integer.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#stringToNumber(Class)}.
+     */
     @Test
-    void testSTR_TO_SHORT() {
-        final ExpressionTranslator<String, Short> translator =
-                ExpressionTranslator.STR_TO_SHORT;
-        final Expression<String> value = BUILDER.get("value", String.class);
-        assertEquals(
-                Expressions.asString(value).castToNum(Short.class),
-                translator.apply(value));
-    }
-
-    @Test
-    void testSHORT_TO_STR() {
-        final ExpressionTranslator<Short, String> translator =
-                ExpressionTranslator.SHORT_TO_STR;
-        final Expression<Short> value = BUILDER.get("value", Short.class);
-        assertEquals(
-                Expressions.asNumber(value).stringValue(),
-                translator.apply(value));
-    }
-
-    @Test
-    void testSTR_TO_INT() {
-        final ExpressionTranslator<String, Integer> translator =
-                ExpressionTranslator.STR_TO_INT;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void stringToNumberTest() {
+        final ExpressionTranslator<String, Integer> translator = ExpressionTranslator.stringToNumber(Integer.class);
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(Integer.class),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#BYTE_TO_STR}.
+     */
     @Test
-    void testINT_TO_STR() {
-        final ExpressionTranslator<Integer, String> translator =
-                ExpressionTranslator.INT_TO_STR;
-        final Expression<Integer> value = BUILDER.get("value", Integer.class);
+    void byteToStrTest() {
+        final ExpressionTranslator<Byte, String> translator = ExpressionTranslator.BYTE_TO_STR;
+        assertNotNull(translator);
+        final Expression<Byte> value = bean.getNumber("prop", Byte.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_BYTE}.
+     */
     @Test
-    void testSTR_TO_LONG() {
-        final ExpressionTranslator<String, Long> translator =
-                ExpressionTranslator.STR_TO_LONG;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToByteTest() {
+        final ExpressionTranslator<String, Byte> translator = ExpressionTranslator.STR_TO_BYTE;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
+        assertEquals(
+                Expressions.asString(value).castToNum(Byte.class),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#BYTE_TO_STR}.
+     */
+    @Test
+    void shortToStrTest() {
+        final ExpressionTranslator<Short, String> translator = ExpressionTranslator.SHORT_TO_STR;
+        assertNotNull(translator);
+        final Expression<Short> value = bean.getNumber("prop", Short.class);
+        assertEquals(
+                Expressions.asNumber(value).stringValue(),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_BYTE}.
+     */
+    @Test
+    void strToShortTest() {
+        final ExpressionTranslator<String, Short> translator = ExpressionTranslator.STR_TO_SHORT;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
+        assertEquals(
+                Expressions.asString(value).castToNum(Short.class),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#INT_TO_STR}.
+     */
+    @Test
+    void intToStrTest() {
+        final ExpressionTranslator<Integer, String> translator = ExpressionTranslator.INT_TO_STR;
+        assertNotNull(translator);
+        final Expression<Integer> value = bean.getNumber("prop", Integer.class);
+        assertEquals(
+                Expressions.asNumber(value).stringValue(),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_INT}.
+     */
+    @Test
+    void strToIntTest() {
+        final ExpressionTranslator<String, Integer> translator = ExpressionTranslator.STR_TO_INT;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
+        assertEquals(
+                Expressions.asString(value).castToNum(Integer.class),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#LONG_TO_STR}.
+     */
+    @Test
+    void longToStrTest() {
+        final ExpressionTranslator<Long, String> translator = ExpressionTranslator.LONG_TO_STR;
+        assertNotNull(translator);
+        final Expression<Long> value = bean.getNumber("prop", Long.class);
+        assertEquals(
+                Expressions.asNumber(value).stringValue(),
+                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_LONG}.
+     */
+    @Test
+    void strToLongTest() {
+        final ExpressionTranslator<String, Long> translator = ExpressionTranslator.STR_TO_LONG;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(Long.class),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#FLOAT_TO_STR}.
+     */
     @Test
-    void testLONG_TO_STR() {
-        final ExpressionTranslator<Long, String> translator =
-                ExpressionTranslator.LONG_TO_STR;
-        final Expression<Long> value = BUILDER.get("value", Long.class);
+    void floatToStrTest() {
+        final ExpressionTranslator<Float, String> translator = ExpressionTranslator.FLOAT_TO_STR;
+        assertNotNull(translator);
+        final Expression<Float> value = bean.getNumber("prop", Float.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_FLOAT}.
+     */
     @Test
-    void testSTR_TO_FLOAT() {
-        final ExpressionTranslator<String, Float> translator =
-                ExpressionTranslator.STR_TO_FLOAT;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToFloatTest() {
+        final ExpressionTranslator<String, Float> translator = ExpressionTranslator.STR_TO_FLOAT;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(Float.class),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#DOUBLE_TO_STR}.
+     */
     @Test
-    void testFLOAT_TO_STR() {
-        final ExpressionTranslator<Float, String> translator =
-                ExpressionTranslator.FLOAT_TO_STR;
-        final Expression<Float> value = BUILDER.get("value", Float.class);
+    void doubleToStrTest() {
+        final ExpressionTranslator<Double, String> translator = ExpressionTranslator.DOUBLE_TO_STR;
+        assertNotNull(translator);
+        final Expression<Double> value = bean.getNumber("prop", Double.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_DOUBLE}.
+     */
     @Test
-    void testSTR_TO_DOUBLE() {
-        final ExpressionTranslator<String, Double> translator =
-                ExpressionTranslator.STR_TO_DOUBLE;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToDoubleTest() {
+        final ExpressionTranslator<String, Double> translator = ExpressionTranslator.STR_TO_DOUBLE;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(Double.class),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#BIG_INT_TO_STR}.
+     */
     @Test
-    void testDOUBLE_TO_STR() {
-        final ExpressionTranslator<Double, String> translator =
-                ExpressionTranslator.DOUBLE_TO_STR;
-        final Expression<Double> value = BUILDER.get("value", Double.class);
+    void bigIntToStrTest() {
+        final ExpressionTranslator<BigInteger, String> translator = ExpressionTranslator.BIG_INT_TO_STR;
+        assertNotNull(translator);
+        final Expression<BigInteger> value = bean.getNumber("prop", BigInteger.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_BIG_INT}.
+     */
     @Test
-    void testSTR_TO_BIG_INT() {
-        final ExpressionTranslator<String, BigInteger> translator =
-                ExpressionTranslator.STR_TO_BIG_INT;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToBigIntTest() {
+        final ExpressionTranslator<String, BigInteger> translator = ExpressionTranslator.STR_TO_BIG_INT;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(BigInteger.class),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#BIG_DEC_TO_STR}.
+     */
     @Test
-    void testBIG_INT_TO_STR() {
-        final ExpressionTranslator<BigInteger, String> translator =
-                ExpressionTranslator.BIG_INT_TO_STR;
-        final Expression<BigInteger> value = BUILDER.get("value", BigInteger.class);
+    void bigDecToStrTest() {
+        final ExpressionTranslator<BigDecimal, String> translator = ExpressionTranslator.BIG_DEC_TO_STR;
+        assertNotNull(translator);
+        final Expression<BigDecimal> value = bean.getNumber("prop", BigDecimal.class);
         assertEquals(
                 Expressions.asNumber(value).stringValue(),
                 translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 
+    /**
+     * Test for {@link ExpressionTranslator#STR_TO_BIG_DEC}.
+     */
     @Test
-    void testSTR_TO_BIG_DEC() {
-        final ExpressionTranslator<String, BigDecimal> translator =
-                ExpressionTranslator.STR_TO_BIG_DEC;
-        final Expression<String> value = BUILDER.get("value", String.class);
+    void strToBigDecTest() {
+        final ExpressionTranslator<String, BigDecimal> translator = ExpressionTranslator.STR_TO_BIG_DEC;
+        assertNotNull(translator);
+        final Expression<String> value = bean.getString("prop");
         assertEquals(
                 Expressions.asString(value).castToNum(BigDecimal.class),
                 translator.apply(value));
-    }
-
-    @Test
-    void testBIG_DEC_TO_STR() {
-        final ExpressionTranslator<BigDecimal, String> translator =
-                ExpressionTranslator.BIG_DEC_TO_STR;
-        final Expression<BigDecimal> value = BUILDER.get("value", BigDecimal.class);
-        assertEquals(
-                Expressions.asNumber(value).stringValue(),
-                translator.apply(value));
+        assertThrows(NullPointerException.class, () -> translator.apply(null));
     }
 }
