@@ -296,7 +296,7 @@ extends TranslateVisitor {
      * @param <T> The target expression type
      * @since 0.1
      */
-    protected static abstract class Builder<S, T> {
+    protected abstract static class Builder<S, T> {
 
         /** The source path. */
         private final @NotNull Path<S> source;

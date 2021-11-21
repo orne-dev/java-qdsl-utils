@@ -84,9 +84,9 @@ extends DelegatedTranslateVisitor {
      * @param path The source path
      * @return A builder, to chain configuration calls
      */
-    public static <S> PathTranslator.TargetBuilder<S> fromPath(
+    public static <S> SimplePathTranslator.TargetBuilder<S> fromPath(
             final @NotNull Path<S> path) {
-        return PathTranslator.fromPath(path);
+        return SimplePathTranslator.fromPath(path);
     }
 
     /**
@@ -111,10 +111,10 @@ extends DelegatedTranslateVisitor {
      * @param target The target property path
      * @return The property path translator
      */
-    public static <V> PathTranslator<V> renamePath(
+    public static <V> SimplePathTranslator<V> renamePath(
             final @NotNull Path<V> source,
             final @NotNull Path<V> target) {
-        return PathTranslator.fromPath(source).toPath(target).build();
+        return SimplePathTranslator.fromPath(source).toPath(target).build();
     }
 
     /**

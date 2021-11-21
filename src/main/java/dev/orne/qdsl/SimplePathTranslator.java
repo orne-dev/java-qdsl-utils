@@ -29,13 +29,13 @@ import com.querydsl.core.types.Path;
 
 /**
  * Visitor that translates references to the source path with references to
- * the target path.
+ * the target path of the same type.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2021-10
  * @since 0.1
  */
-public class PathTranslator<S>
+public class SimplePathTranslator<S>
 extends AbstractPathTranslator<S, S> {
 
     /**
@@ -43,7 +43,7 @@ extends AbstractPathTranslator<S, S> {
      * 
      * @param builder The builder
      */
-    protected PathTranslator(
+    protected SimplePathTranslator(
             final @NotNull Builder<S> builder) {
         super(builder);
     }
@@ -119,7 +119,7 @@ extends AbstractPathTranslator<S, S> {
          * 
          * @return The created path translator
          */
-        @NotNull PathTranslator<S> build();
+        @NotNull SimplePathTranslator<S> build();
     }
 
     /**
@@ -180,8 +180,8 @@ extends AbstractPathTranslator<S, S> {
          * {@inheritDoc}
          */
         @Override
-        public @NotNull PathTranslator<S> build() {
-            return new PathTranslator<>(this);
+        public @NotNull SimplePathTranslator<S> build() {
+            return new SimplePathTranslator<>(this);
         }
     }
 }
