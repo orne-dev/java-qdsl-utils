@@ -76,7 +76,7 @@ extends Function<Expression<S>, ValueAssignments> {
      * Translators for multiple assignments can be implemented easily based on
      * this method:
      * <pre>
-     * AssigmentTranslator{@literal<}S{@literal>} translator = e -> ValueAssigment.array(
+     * AssigmentTranslator{@literal <}S{@literal >} translator = e -{@literal >} ValueAssigment.array(
      *             toSingleValue(pathA, valueTransA, exprTransA, e),
      *             toSingleValue(pathB, valueTransB, exprTransB, e)
      *         );
@@ -157,9 +157,12 @@ extends Function<Expression<S>, ValueAssignments> {
     /**
      * Convert the specified simple translator to a complete translator.
      * 
+     * @param <S> The single assignment type
+     * @param simple The single assignment translator
      * @return A lambda that implements {@code AssigmentTranslator}
      */
-    static <S> ValueAssignmentTranslator<S> fromSimple(Simple<S> simple) {
+    static <S> ValueAssignmentTranslator<S> fromSimple(
+            final @NotNull Simple<S> simple) {
         return e -> ValueAssignments.of(simple.apply(e));
     }
 

@@ -137,6 +137,13 @@ implements ValueAssignmentReplaceVisitor<Void> {
         }
     }
 
+    /**
+     * Starts the construction of a new instance.
+     * 
+     * @param <V> The source path type
+     * @param source The source path
+     * @return The next step builder
+     */
     public static <V> TargetBuilder<V> fromPath(
             final @NotNull Path<V> source) {
         return new Builder<>(source);

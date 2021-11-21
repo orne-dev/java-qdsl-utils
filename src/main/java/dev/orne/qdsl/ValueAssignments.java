@@ -240,6 +240,8 @@ implements Cloneable,
      * 
      * @param <T> The type of the path
      * @param path The path whose value assignment is to be returned
+     * @param defaultValue The default value to return if this instance
+     * contains no assignment for the path
      * @return The value assignment for the specified path,
      * with {@code defaultValue} if this map contains no assignment for the
      * path

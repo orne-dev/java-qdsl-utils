@@ -140,7 +140,7 @@ public class ValueAssignment<V> {
      *
      * @param <R> return type
      * @param <C> context type
-     * @param v The translation visitor
+     * @param visitor The translation visitor
      * @param context The context of visit
      * @return The result of the visit
      */

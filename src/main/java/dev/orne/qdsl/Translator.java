@@ -71,6 +71,7 @@ extends ChainedReplaceVisitor {
      * Creates a new instance.
      * 
      * @param visitors The delegated translators
+     * @return The created instance
      */
     @SafeVarargs
     public static Translator with(
@@ -124,12 +125,12 @@ extends ChainedReplaceVisitor {
     /**
      * Translates the specified query projection expressions if required.
      * 
-     * @param expr The expressions to translate
+     * @param exprs The expressions to translate
      * @return The resulting expressions, translated if required
      */
     public @NotNull Expression<?>[] translateProjections(
-            final @NotNull Expression<?>... o) {
-        return Arrays.asList(o)
+            final @NotNull Expression<?>... exprs) {
+        return Arrays.asList(exprs)
                 .parallelStream()
                 .map(this::translateProjection)
                 .toArray(Expression<?>[]::new);
@@ -154,12 +155,12 @@ extends ChainedReplaceVisitor {
     /**
      * Translates the specified predicate expressions if required.
      * 
-     * @param expr The expressions to translate
+     * @param exprs The expressions to translate
      * @return The resulting expressions, translated if required
      */
     public @NotNull Predicate[] translatePredicates(
-            final @NotNull Predicate... o) {
-        return Arrays.asList(o)
+            final @NotNull Predicate... exprs) {
+        return Arrays.asList(exprs)
                 .parallelStream()
                 .map(this::translatePredicate)
                 .toArray(Predicate[]::new);

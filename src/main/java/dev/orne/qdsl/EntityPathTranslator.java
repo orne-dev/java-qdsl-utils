@@ -94,6 +94,13 @@ implements ValueAssignmentReplaceVisitor<Void> {
         this.assignmentTranslator = builder.assignmentTranslator;
     }
 
+    /**
+     * Starts the construction of a new instance.
+     * 
+     * @param <V> The source path type
+     * @param source The source path
+     * @return The next step builder
+     */
     public static <V> TargetBuilder<V> fromPath(
             final @NotNull EntityPath<V> source) {
         return new InitialBuilder<>(source);
@@ -189,6 +196,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
         /**
          * Set the target identity path.
          * 
+         * @param <I> The identity type
          * @param target The target identity path
          * @return The next step builder
          */
@@ -238,7 +246,6 @@ implements ValueAssignmentReplaceVisitor<Void> {
         /**
          * Set a simple value assignment translation.
          * 
-         * @param target The target path
          * @param exprTranslator The value expression translator
          * @param valueTranslator The value translator
          * @return The next step builder
@@ -277,6 +284,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
     protected static class InitialBuilder<S>
     implements TargetBuilder<S> {
 
+        /** The source entity path. */
         protected final @NotNull EntityPath<S> source;
 
         /**
@@ -290,6 +298,9 @@ implements ValueAssignmentReplaceVisitor<Void> {
             this.source = source;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public <I> @NotNull ProjectionBuilder<S, I> toIdentity(
                 final @NotNull Path<I> target) {
@@ -433,7 +444,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
         }
 
         /**
-         * {@index}
+         * {@inheritDoc}
          */
         @Override
         public @NotNull EntityPathTranslator<S, I> build() {
