@@ -104,7 +104,7 @@ extends Function<S, T> {
             final @NotNull String falseValue) {
         Validate.notNull(trueValue);
         Validate.notNull(falseValue);
-        return e -> e ? trueValue : falseValue;
+        return e -> Boolean.TRUE.equals(e) ? trueValue : falseValue;
     }
 
     /**

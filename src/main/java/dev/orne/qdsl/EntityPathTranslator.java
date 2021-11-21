@@ -67,6 +67,7 @@ extends AbstractPathTranslator<S, I> {
      * 
      * @return The source entity path
      */
+    @Override
     public @NotNull EntityPath<S> getSource() {
         return (EntityPath<S>) super.getSource();
     }
@@ -276,7 +277,7 @@ extends AbstractPathTranslator<S, I> {
         public @NotNull StoreBuilder<S, I> withProjection(
                 final @NotNull ProjectionRole<S> projection) {
             setProjection(projection.getProjection());
-            return null;
+            return this;
         }
 
         /**
@@ -287,7 +288,7 @@ extends AbstractPathTranslator<S, I> {
                 final @NotNull ExpressionTranslator<S, I> exprTranslator,
                 final @NotNull ValueTranslator<S, I> valueTranslator) {
             setAssignmentTranslator(AssignmentTranslator.forPath(
-                    (Path<I>) getTarget(),
+                    (Path<I>) super.getTarget(),
                     valueTranslator,
                     exprTranslator));
             return this;

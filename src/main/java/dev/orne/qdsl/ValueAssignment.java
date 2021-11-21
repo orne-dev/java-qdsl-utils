@@ -91,7 +91,7 @@ public class ValueAssignment<V> {
     public static @NotNull <V> ValueAssignment<V> of(
             final @NotNull Path<V> path,
             final Expression<? extends V> value) {
-        return new ValueAssignment<V>(path, value);
+        return new ValueAssignment<>(path, value);
     }
 
     /**

@@ -216,7 +216,7 @@ extends TranslateVisitor {
         ValueAssignments result = ValueAssignments.of(vexpr);
         for (final TranslateVisitor visitor : this.visitors) {
             result = result.parallelStream()
-                .map((p) -> visitor.visit(p, context))
+                .map(p -> visitor.visit(p, context))
                 .collect(
                         ValueAssignments::new,
                         ValueAssignments::addAll,

@@ -254,7 +254,7 @@ extends ReplaceVisitor<TranslateVisitor.Context> {
      * 
      * @since 0.1
      */
-    public static enum Context {
+    public enum Context {
         /** Expression is part of a query projection. */
         PROJECTION,
         /** Expression is part of a predicate. */

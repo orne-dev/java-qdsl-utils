@@ -42,6 +42,7 @@
 
   <properties>
     <java.version>8</java.version>
+    <java.jdk.version>9</java.jdk.version>
     <java.module.name>dev.orne.qdsl</java.module.name>
     <license.licenseName>lgpl_v3</license.licenseName>
 
