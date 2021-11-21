@@ -4,7 +4,7 @@ package dev.orne.qdsl;
  * #%L
  * Orne Querydsl Utils
  * %%
- * Copyright (C) 2022 Orne Developments
+ * Copyright (C) 2021 Orne Developments
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -34,224 +34,181 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Visitor;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.PathBuilder;
 
 /**
- * Unit tests for {@code AssignmentTranslator}.
+ * Unit tests for {@code ValueAssignmentTranslator}.
  *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2022-01
+ * @version 1.0, 2021-11
  * @since 0.1
- * @see AssignmentTranslator
+ * @see ValueAssignmentTranslator
  */
 @Tag("ut")
-public class AssignmentTranslatorTest {
+class ValueAssignmentTranslatorTest {
 
+    private final static PathBuilder<Object> builder =
+            new PathBuilder<>(Object.class, "bean");
+
+    /**
+     * Test for {@link ValueAssignmentTranslator#identity(Path)}.
+     */
     @Test
-    void testIdentity() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final AssignmentTranslator<TestTypes.SimpleType> translator =
-                AssignmentTranslator.identity(path);
-        final Expression<TestTypes.SimpleType> value =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
+    void identityTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
+        final ValueAssignmentTranslator<Object> translator = ValueAssignmentTranslator.identity(target);
+        assertNotNull(translator);
+        final Expression<Object> value = builder.getSimple("value", Object.class);
         final ValueAssignments result = translator.apply(value);
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(value, result.get(path));
+        assertEquals(value, result.get(target));
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#toSingleValue(Path, ValueTranslator, ExpressionTranslator, Expression)}.
+     */
     @Test
-    @SuppressWarnings("unchecked")
-    void testSingleValue_Null() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
-        final Expression<TestTypes.SimpleType> expectedValue =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
-        willReturn(expectedValue).given(expressionTranslator).apply(null);
-        ValueAssignment<?> result = AssignmentTranslator.toSingleValue(
-                path,
-                valueTranslator,
-                expressionTranslator,
-                null);
-        assertSame(path, result.getPath());
-        assertSame(expectedValue, result.getValue());
-        then(valueTranslator).shouldHaveNoInteractions();
-        then(expressionTranslator).should().apply(null);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void testSingleValue_Constant() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
+    void toSingleValueConstantTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
         final Object value = new Object();
-        final Expression<Object> valueExpr =
-                Expressions.constant(value);
-        final TestTypes.SimpleType expectedValue =
-                mock(TestTypes.SimpleType.class);
+        final Expression<Object> valueConst = Expressions.constant(value);
+        @SuppressWarnings("unchecked")
+        final ValueTranslator<Object, Object> valueTranslator = mock(ValueTranslator.class);
+        final Object expectedValue = new Object();
         willReturn(expectedValue).given(valueTranslator).apply(value);
-        ValueAssignment<?> result = AssignmentTranslator.toSingleValue(
-                path,
+        @SuppressWarnings("unchecked")
+        final ExpressionTranslator<Object, Object> expressionTranslator = mock(ExpressionTranslator.class);
+        final ValueAssignment<?> result = ValueAssignmentTranslator.toSingleValue(
+                target,
                 valueTranslator,
                 expressionTranslator,
-                valueExpr);
-        assertSame(path, result.getPath());
-        assertNotNull(result.getValue());
-        assertTrue(result.getValue() instanceof Constant);
-        assertSame(expectedValue, ((Constant<?>) result.getValue()).getConstant());
+                valueConst);
+        assertNotNull(result);
+        assertEquals(target, result.getPath());
+        assertInstanceOf(Constant.class, result.getValue());
+        assertEquals(expectedValue, ((Constant<?>) result.getValue()).getConstant());
         then(valueTranslator).should().apply(value);
         then(expressionTranslator).shouldHaveNoInteractions();
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#toSingleValue(Path, ValueTranslator, ExpressionTranslator, Expression)}.
+     */
     @Test
-    @SuppressWarnings("unchecked")
-    void testSingleValue_Expression() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
-        final Expression<Object> value =
-                TestTypes.expressionOf(Object.class);
-        final Expression<TestTypes.SimpleType> expectedValue =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
+    void toSingleValueExpressionTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
+        final Expression<Object> value = builder.getSimple("value", Object.class);
+        @SuppressWarnings("unchecked")
+        final ValueTranslator<Object, Object> valueTranslator = mock(ValueTranslator.class);
+        @SuppressWarnings("unchecked")
+        final ExpressionTranslator<Object, Object> expressionTranslator = mock(ExpressionTranslator.class);
+        final Expression<Object> expectedValue = builder.getSimple("expectedValue", Object.class);
         willReturn(expectedValue).given(expressionTranslator).apply(value);
-        ValueAssignment<?> result = AssignmentTranslator.toSingleValue(
-                path,
-                valueTranslator,
+        final ValueAssignment<?> result = ValueAssignmentTranslator.toSingleValue(
+                target,
+                valueTranslator ,
                 expressionTranslator,
                 value);
-        assertSame(path, result.getPath());
-        assertSame(expectedValue, result.getValue());
-        then(valueTranslator).shouldHaveNoInteractions();
+        assertNotNull(result);
+        assertEquals(target, result.getPath());
+        assertEquals(expectedValue, result.getValue());
         then(expressionTranslator).should().apply(value);
+        then(valueTranslator).shouldHaveNoInteractions();
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#forPath(Path, ExpressionTranslator)}.
+     */
     @Test
-    @SuppressWarnings("unchecked")
-    void testForPath_Expression() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
-        final Expression<Object> value =
-                TestTypes.expressionOf(Object.class);
-        final Expression<TestTypes.SimpleType> expectedValue =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
+    void forPathSimpleTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
+        @SuppressWarnings("unchecked")
+        final ExpressionTranslator<Object, Object> expressionTranslator = mock(ExpressionTranslator.class);
+        final Expression<Object> value = builder.getSimple("value", Object.class);
+        final Expression<Object> expectedValue = builder.getSimple("expectedValue", Object.class);
         willReturn(expectedValue).given(expressionTranslator).apply(value);
-        final AssignmentTranslator<Object> translator = AssignmentTranslator.forPath(
-                path,
-                expressionTranslator);
+        final ValueAssignmentTranslator<Object> translator = ValueAssignmentTranslator.forPath(target, expressionTranslator);
+        assertNotNull(translator);
         final ValueAssignments result = translator.apply(value);
+        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(expectedValue, result.get(path));
+        assertEquals(expectedValue, result.get(target));
         then(expressionTranslator).should().apply(value);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#forPath(Path, ValueTranslator, ExpressionTranslator)}.
+     */
     @Test
-    @SuppressWarnings("unchecked")
-    void testForPath_Complex_Null() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
-        final Expression<TestTypes.SimpleType> expectedValue =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
-        willReturn(expectedValue).given(expressionTranslator).apply(null);
-        final AssignmentTranslator<Object> translator = AssignmentTranslator.forPath(
-                path,
-                valueTranslator,
-                expressionTranslator);
-        final ValueAssignments result = translator.apply(null);
-        assertEquals(1, result.size());
-        assertEquals(expectedValue, result.get(path));
-        then(valueTranslator).shouldHaveNoInteractions();
-        then(expressionTranslator).should().apply(null);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void testForPath_Complex_Constant() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
+    void forPathConstantTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
         final Object value = new Object();
-        final Expression<Object> valueExpr =
-                Expressions.constant(value);
-        final TestTypes.SimpleType expectedValue =
-                mock(TestTypes.SimpleType.class);
+        final Expression<Object> valueConst = Expressions.constant(value);
+        @SuppressWarnings("unchecked")
+        final ValueTranslator<Object, Object> valueTranslator = mock(ValueTranslator.class);
+        final Object expectedValue = new Object();
         willReturn(expectedValue).given(valueTranslator).apply(value);
-        final AssignmentTranslator<Object> translator = AssignmentTranslator.forPath(
-                path,
-                valueTranslator,
-                expressionTranslator);
-        final ValueAssignments result = translator.apply(valueExpr);
+        @SuppressWarnings("unchecked")
+        final ExpressionTranslator<Object, Object> expressionTranslator = mock(ExpressionTranslator.class);
+        final ValueAssignmentTranslator<Object> translator = ValueAssignmentTranslator.forPath(target, valueTranslator, expressionTranslator);
+        assertNotNull(translator);
+        final ValueAssignments result = translator.apply(valueConst);
+        assertNotNull(result);
         assertEquals(1, result.size());
-        final Expression<?> resultValue = result.get(path);
-        assertNotNull(resultValue);
-        assertTrue(resultValue instanceof Constant);
-        assertSame(expectedValue, ((Constant<?>) resultValue).getConstant());
+        final Expression<?> resultValue = result.get(target);
+        assertInstanceOf(Constant.class, resultValue);
+        assertEquals(expectedValue, ((Constant<?>) resultValue).getConstant());
         then(valueTranslator).should().apply(value);
         then(expressionTranslator).shouldHaveNoInteractions();
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#forPath(Path, ValueTranslator, ExpressionTranslator)}.
+     */
     @Test
-    @SuppressWarnings("unchecked")
-    void testForPath_Complex_Expression() {
-        final Path<TestTypes.SimpleType> path =
-                TestTypes.pathOf(TestTypes.SimpleType.class);
-        final ValueTranslator<Object, TestTypes.SimpleType> valueTranslator =
-                mock(ValueTranslator.class);
-        final ExpressionTranslator<Object, TestTypes.SimpleType> expressionTranslator =
-                mock(ExpressionTranslator.class);
-        final Expression<Object> value =
-                TestTypes.expressionOf(Object.class);
-        final Expression<TestTypes.SimpleType> expectedValue =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
-        willReturn(expectedValue).given(expressionTranslator).apply(value);
-        final AssignmentTranslator<Object> translator = AssignmentTranslator.forPath(
-                path,
-                valueTranslator,
-                expressionTranslator);
-        final ValueAssignments result = translator.apply(value);
-        assertEquals(1, result.size());
-        assertEquals(expectedValue, result.get(path));
-        then(valueTranslator).shouldHaveNoInteractions();
-        then(expressionTranslator).should().apply(value);
-    }
-
-    @Test
-    void testFromSimple() {
+    void forPathExpressionTest() {
+        final Path<Object> target = builder.getSimple("target", Object.class);
         @SuppressWarnings("unchecked")
-        final AssignmentTranslator.Simple<TestTypes.SimpleType> simple =
-                mock(AssignmentTranslator.Simple.class);
-        final ValueAssignment<?> expected = TestTypes.randomValueAssignment();
-        final Expression<TestTypes.SimpleType> value =
-                TestTypes.expressionOf(TestTypes.SimpleType.class);
-        willReturn(expected).given(simple).apply(value);
-        final AssignmentTranslator<TestTypes.SimpleType> translator =
-                AssignmentTranslator.fromSimple(simple);
+        final ValueTranslator<Object, Object> valueTranslator = mock(ValueTranslator.class);
+        @SuppressWarnings("unchecked")
+        final ExpressionTranslator<Object, Object> expressionTranslator = mock(ExpressionTranslator.class);
+        final Expression<Object> value = builder.getSimple("value", Object.class);
+        final Expression<Object> expectedValue = builder.getSimple("expectedValue", Object.class);
+        willReturn(expectedValue).given(expressionTranslator).apply(value);
+        final ValueAssignmentTranslator<Object> translator = ValueAssignmentTranslator.forPath(target, valueTranslator, expressionTranslator);
+        assertNotNull(translator);
         final ValueAssignments result = translator.apply(value);
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(expected.getValue(), result.get(expected.getPath()));
+        assertEquals(expectedValue, result.get(target));
+        then(expressionTranslator).should().apply(value);
+        then(valueTranslator).shouldHaveNoInteractions();
+    }
+
+    /**
+     * Test for {@link ValueAssignmentTranslator#fromSimple(dev.orne.qdsl.ValueAssignmentTranslator.Simple)}.
+     */
+    @Test
+    void fromSimpleTest() {
+        @SuppressWarnings("unchecked")
+        final ValueAssignmentTranslator.Simple<Object> simple = mock(ValueAssignmentTranslator.Simple.class);
+        final Expression<Object> value = builder.getSimple("value", Object.class);
+        final Path<String> expectedTarget = builder.getSimple("target", String.class);
+        final Expression<String> expectedValue = builder.getSimple("expectedValue", String.class);
+        final ValueAssignment<String> expectedResult = ValueAssignment.of(expectedTarget, expectedValue);
+        willReturn(expectedResult).given(simple).apply(value);
+        final ValueAssignmentTranslator<Object> translator = ValueAssignmentTranslator.fromSimple(simple);
+        final ValueAssignments result = translator.apply(value);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(expectedValue, result.get(expectedTarget));
         then(simple).should().apply(value);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_AllEqual() {
         final Path<TestTypes.SimpleType> path =
@@ -265,13 +222,16 @@ public class AssignmentTranslatorTest {
         willReturn(path).given(path).accept(visitor, null);
         willReturn(expr).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNotNull(result);
         assertSame(assignment, result);
         then(path).should().accept(visitor, null);
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_PathTranslated() {
         final Path<TestTypes.SimpleType> path =
@@ -287,7 +247,7 @@ public class AssignmentTranslatorTest {
         willReturn(translatedPath).given(path).accept(visitor, null);
         willReturn(expr).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNotNull(result);
         assertSame(translatedPath, result.getPath());
         assertSame(expr, result.getValue());
@@ -295,6 +255,9 @@ public class AssignmentTranslatorTest {
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_ValueTranslated() {
         final Path<TestTypes.SimpleType> path =
@@ -310,7 +273,7 @@ public class AssignmentTranslatorTest {
         willReturn(path).given(path).accept(visitor, null);
         willReturn(translatedExpr).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNotNull(result);
         assertSame(path, result.getPath());
         assertSame(translatedExpr, result.getValue());
@@ -318,6 +281,9 @@ public class AssignmentTranslatorTest {
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_AllTranslated() {
         final Path<TestTypes.SimpleType> path =
@@ -335,7 +301,7 @@ public class AssignmentTranslatorTest {
         willReturn(translatedPath).given(path).accept(visitor, null);
         willReturn(translatedExpr).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNotNull(result);
         assertSame(translatedPath, result.getPath());
         assertSame(translatedExpr, result.getValue());
@@ -343,6 +309,9 @@ public class AssignmentTranslatorTest {
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_NullPath() {
         final Path<TestTypes.SimpleType> path =
@@ -358,12 +327,15 @@ public class AssignmentTranslatorTest {
         willReturn(null).given(path).accept(visitor, null);
         willReturn(translatedExpr).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNull(result);
         then(path).should().accept(visitor, null);
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_NullValue() {
         final Path<TestTypes.SimpleType> path =
@@ -379,7 +351,7 @@ public class AssignmentTranslatorTest {
         willReturn(translatedPath).given(path).accept(visitor, null);
         willReturn(null).given(expr).accept(visitor, null);
         final ValueAssignment<?> result =
-                AssignmentTranslator.translateFromComponents(assignment, visitor);
+                ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         assertNotNull(result);
         assertSame(translatedPath, result.getPath());
         assertNull(result.getValue());
@@ -387,6 +359,9 @@ public class AssignmentTranslatorTest {
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_NotAPath() {
         final Path<TestTypes.SimpleType> path =
@@ -404,12 +379,15 @@ public class AssignmentTranslatorTest {
         willReturn(translatedPath).given(path).accept(visitor, null);
         willReturn(translatedExpr).given(expr).accept(visitor, null);
         assertThrows(IllegalArgumentException.class, () -> {
-            AssignmentTranslator.translateFromComponents(assignment, visitor);
+            ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         });
         then(path).should().accept(visitor, null);
         then(expr).should().accept(visitor, null);
     }
 
+    /**
+     * Test for {@link ValueAssignmentTranslator#translateFromComponents(ValueAssignment, Visitor)}.
+     */
     @Test
     void testTranslateFromComponents_NotAssignable() {
         final Path<TestTypes.SimpleType> path =
@@ -427,7 +405,7 @@ public class AssignmentTranslatorTest {
         willReturn(translatedPath).given(path).accept(visitor, null);
         willReturn(translatedExpr).given(expr).accept(visitor, null);
         assertThrows(IllegalArgumentException.class, () -> {
-            AssignmentTranslator.translateFromComponents(assignment, visitor);
+            ValueAssignmentTranslator.translateFromComponents(assignment, visitor);
         });
         then(path).should().accept(visitor, null);
         then(expr).should().accept(visitor, null);

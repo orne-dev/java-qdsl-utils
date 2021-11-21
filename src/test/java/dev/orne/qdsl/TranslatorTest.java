@@ -47,7 +47,7 @@ import com.querydsl.core.types.dsl.StringPath;
  * @see Translator
  */
 @Tag("ut")
-public class TranslatorTest {
+class TranslatorTest {
 
     private static final String PROPERTY_A = "propertyA";
     private static final String PROPERTY_B = "propertyB";
@@ -63,8 +63,8 @@ public class TranslatorTest {
     private static final Expression<String> EXPR =
             mock(Expression.class);
     @SuppressWarnings("unchecked")
-    private static final AssignmentTranslator<String> ASSIGN_TR =
-            mock(AssignmentTranslator.class);
+    private static final ValueAssignmentTranslator<String> ASSIGN_TR =
+            mock(ValueAssignmentTranslator.class);
     @SuppressWarnings("unchecked")
     private static final ExpressionTranslator<String, String> EXPR_TR =
             mock(ExpressionTranslator.class);
@@ -136,7 +136,7 @@ public class TranslatorTest {
                 PROPERTY_B_PATH);
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(PROPERTY_B_PATH, result.getTarget());
-        final AssignmentTranslator<String> atr = result.getAssignmentTranslator();
+        final ValueAssignmentTranslator<String> atr = result.getAssignmentTranslator();
         assertNotNull(atr);
         final ValueAssignments atrResult = atr.apply(EXPR);
         assertNotNull(atrResult);
@@ -152,7 +152,7 @@ public class TranslatorTest {
                 .build();
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(PROPERTY_B_PATH, result.getTarget());
-        final AssignmentTranslator<String> atr = result.getAssignmentTranslator();
+        final ValueAssignmentTranslator<String> atr = result.getAssignmentTranslator();
         assertNotNull(atr);
         final ValueAssignments atrResult = atr.apply(EXPR);
         assertNotNull(atrResult);
@@ -169,7 +169,7 @@ public class TranslatorTest {
                 .build();
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(EXPR, result.getTarget());
-        final AssignmentTranslator<String> atr = result.getAssignmentTranslator();
+        final ValueAssignmentTranslator<String> atr = result.getAssignmentTranslator();
         assertNotNull(atr);
         final Expression<String> mockRes = Expressions.asSimple("mockExpr");
         willReturn(mockRes).given(EXPR_TR).apply(EXPR);

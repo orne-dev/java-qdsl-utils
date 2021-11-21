@@ -8,7 +8,7 @@
     01. Added `dev.orne.qdsl.ExpressionTranslator` interface.
     01. Added `dev.orne.qdsl.ValueAssigment` class.
     01. Added `dev.orne.qdsl.ValueAssigments` class.
-    01. Added `dev.orne.qdsl.AssigmentTranslator` interface.
+    01. Added `dev.orne.qdsl.ValueAssigmentTranslator` interface.
     01. Added `dev.orne.qdsl.OrderSpecifierVisitor` interface.
     01. Added `dev.orne.qdsl.OrderSpecifierReplaceVisitor` interface.
     01. Added `dev.orne.qdsl.ValueAssignmentVisitor` interface.

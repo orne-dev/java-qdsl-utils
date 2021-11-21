@@ -47,7 +47,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
     /** The target expression. */
     private final @NotNull Expression<S> target;
     /** The value assignment translator. */
-    private final @NotNull AssignmentTranslator<S> assignmentTranslator;
+    private final @NotNull ValueAssignmentTranslator<S> assignmentTranslator;
 
     /**
      * Creates a new instance.
@@ -59,7 +59,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
     protected SimplePathTranslator(
             final @NotNull Path<S> source,
             final @NotNull Expression<S> target,
-            final @NotNull AssignmentTranslator<S> assignmentTranslator) {
+            final @NotNull ValueAssignmentTranslator<S> assignmentTranslator) {
         super();
         this.source = Validate.notNull(source);
         this.target = Validate.notNull(target);
@@ -103,7 +103,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
      * 
      * @return The value assignment translator
      */
-    public @NotNull AssignmentTranslator<S> getAssignmentTranslator() {
+    public @NotNull ValueAssignmentTranslator<S> getAssignmentTranslator() {
         return assignmentTranslator;
     }
 
@@ -200,7 +200,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
          * @return The next step builder
          */
         @NotNull FinalBuilder<S> storingWith(
-                @NotNull AssignmentTranslator<S> translator);
+                @NotNull ValueAssignmentTranslator<S> translator);
     }
 
     /**
@@ -237,7 +237,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
         /** The target expression. */
         private Expression<S> target;
         /** The value assignment translator. */
-        private AssignmentTranslator<S> assignmentTranslator;
+        private ValueAssignmentTranslator<S> assignmentTranslator;
 
         /**
          * Creates a new instance.
@@ -283,7 +283,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
          * 
          * @return The value assignment translator
          */
-        protected AssignmentTranslator<S> getAssignmentTranslator() {
+        protected ValueAssignmentTranslator<S> getAssignmentTranslator() {
             return this.assignmentTranslator;
         }
 
@@ -293,7 +293,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
          * @param translator The value assignment translator
          */
         protected void setAssignmentTranslator(
-                final @NotNull AssignmentTranslator<S> translator) {
+                final @NotNull ValueAssignmentTranslator<S> translator) {
             this.assignmentTranslator = translator;
         }
 
@@ -314,7 +314,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
         public @NotNull Builder<S> toPath(
                 final @NotNull Path<S> target) {
             setTarget(target);
-            setAssignmentTranslator(AssignmentTranslator.identity(target));
+            setAssignmentTranslator(ValueAssignmentTranslator.identity(target));
             return this;
         }
 
@@ -325,7 +325,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
         public <T> @NotNull Builder<S> storingTo(
                 final @NotNull Path<T> target,
                 final @NotNull ExpressionTranslator<S, T> translator) {
-            setAssignmentTranslator(AssignmentTranslator.forPath(target, translator));
+            setAssignmentTranslator(ValueAssignmentTranslator.forPath(target, translator));
             return this;
         }
 
@@ -334,7 +334,7 @@ implements ValueAssignmentReplaceVisitor<Void> {
          */
         @Override
         public @NotNull Builder<S> storingWith(
-                final @NotNull AssignmentTranslator<S> translator) {
+                final @NotNull ValueAssignmentTranslator<S> translator) {
             setAssignmentTranslator(translator);
             return this;
         }

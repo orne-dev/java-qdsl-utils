@@ -1,7 +1,5 @@
 package dev.orne.qdsl;
 
-import java.util.Objects;
-
 /*-
  * #%L
  * Orne Querydsl Utils
@@ -24,6 +22,7 @@ import java.util.Objects;
  * #L%
  */
 
+import java.util.Objects;
 import java.util.function.Function;
 
 import javax.validation.constraints.NotNull;
@@ -45,7 +44,7 @@ import com.querydsl.core.types.dsl.Expressions;
  * @since 0.1
  */
 @FunctionalInterface
-public interface AssignmentTranslator<S>
+public interface ValueAssignmentTranslator<S>
 extends Function<Expression<S>, ValueAssignments> {
 
     /**
@@ -56,7 +55,7 @@ extends Function<Expression<S>, ValueAssignments> {
      * @param target The target property path
      * @return The created assigned value translator
      */
-    static <T> AssignmentTranslator<T> identity(
+    static <T> ValueAssignmentTranslator<T> identity(
             final @NotNull Path<T> target) {
         Validate.notNull(target);
         return e -> ValueAssignments.of(ValueAssignment.of(target, e));
@@ -120,7 +119,7 @@ extends Function<Expression<S>, ValueAssignments> {
      * @param expressionTranslator The expression translator
      * @return The created assigned value translator
      */
-    static <S, T> AssignmentTranslator<S> forPath(
+    static <S, T> ValueAssignmentTranslator<S> forPath(
             final @NotNull Path<T> target,
             final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
         Validate.notNull(target);
@@ -141,7 +140,7 @@ extends Function<Expression<S>, ValueAssignments> {
      * @param expressionTranslator The expression translator
      * @return The created assigned value translator
      */
-    static <S, T> AssignmentTranslator<S> forPath(
+    static <S, T> ValueAssignmentTranslator<S> forPath(
             final @NotNull Path<T> target,
             final @NotNull ValueTranslator<S, T> valueTranslator,
             final @NotNull ExpressionTranslator<S, T> expressionTranslator) {
@@ -160,7 +159,7 @@ extends Function<Expression<S>, ValueAssignments> {
      * 
      * @return A lambda that implements {@code AssigmentTranslator}
      */
-    static <S> AssignmentTranslator<S> fromSimple(Simple<S> simple) {
+    static <S> ValueAssignmentTranslator<S> fromSimple(Simple<S> simple) {
         return e -> ValueAssignments.of(simple.apply(e));
     }
 

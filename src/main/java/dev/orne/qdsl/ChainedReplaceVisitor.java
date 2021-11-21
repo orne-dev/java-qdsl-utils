@@ -239,7 +239,7 @@ implements Visitor<Expression<?>, Void>,
                                 ValueAssignments::addAll);
             } else {
                 result = result.parallelStream()
-                        .map(p -> AssignmentTranslator.translateFromComponents(p, visitor))
+                        .map(p -> ValueAssignmentTranslator.translateFromComponents(p, visitor))
                         .collect(
                                 ValueAssignments::new,
                                 ValueAssignments::addAll,

@@ -60,8 +60,8 @@ class SimplePathTranslatorTest {
     private static final Expression<String> EXPR =
             mock(Expression.class);
     @SuppressWarnings("unchecked")
-    private static final AssignmentTranslator<String> ASSIGN_TR =
-            mock(AssignmentTranslator.class);
+    private static final ValueAssignmentTranslator<String> ASSIGN_TR =
+            mock(ValueAssignmentTranslator.class);
     @SuppressWarnings("unchecked")
     private static final ExpressionTranslator<String, String> EXPR_TR =
             mock(ExpressionTranslator.class);
@@ -98,7 +98,7 @@ class SimplePathTranslatorTest {
                 .build();
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(PROPERTY_B_PATH, result.getTarget());
-        final AssignmentTranslator<String> atr = result.getAssignmentTranslator();
+        final ValueAssignmentTranslator<String> atr = result.getAssignmentTranslator();
         assertNotNull(atr);
         final ValueAssignments atrResult = atr.apply(EXPR);
         assertNotNull(atrResult);
@@ -115,7 +115,7 @@ class SimplePathTranslatorTest {
                 .build();
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(EXPR, result.getTarget());
-        final AssignmentTranslator<String> atr = result.getAssignmentTranslator();
+        final ValueAssignmentTranslator<String> atr = result.getAssignmentTranslator();
         assertNotNull(atr);
         final Expression<String> mockRes = Expressions.asSimple("mockExpr");
         willReturn(mockRes).given(EXPR_TR).apply(EXPR);
