@@ -30,227 +30,317 @@ import java.math.BigInteger;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.ConvertUtilsBean2;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import dev.orne.qdsl.TestTypes.SimpleType;
 
 /**
  * Unit tests for {@code ValueTranslator}.
  *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2022-01
+ * @version 1.0, 2021-11
  * @since 0.1
  * @see ValueTranslator
  */
 @Tag("ut")
 public class ValueTranslatorTest {
 
+    /**
+     * Test for {@link ValueTranslator#identity()}.
+     */
     @Test
     void testIdentity() {
-        final ValueTranslator<Object, Object> translator =
-                ValueTranslator.identity();
+        final ValueTranslator<Object, Object> translator = ValueTranslator.identity();
+        assertNotNull(translator);
         final Object value = new Object();
         final Object result = translator.apply(value);
         assertNotNull(result);
         assertSame(value, result);
     }
 
+    /**
+     * Test for {@link ValueTranslator#booleanToString(String, String)}.
+     */
     @Test
-    void testStringToBoolean() {
-        final ValueTranslator<String, Boolean> translator =
-                ValueTranslator.stringToBoolean("trueValue");
-        assertTrue(translator.apply("truevalue"));
-        assertTrue(translator.apply("trueValue"));
-        assertTrue(translator.apply("TrUeVaLuE"));
-        assertTrue(translator.apply("TRUEVALUE"));
-        assertNull(translator.apply(null));
-        assertFalse(translator.apply("true"));
-        assertFalse(translator.apply("false"));
-        assertFalse(translator.apply("other value"));
-    }
-
-    @Test
-    void testBooleanToString() {
-        final String trueValue = "trueValue";
-        final String falseValue = "falseValue";
-        final ValueTranslator<Boolean, String> translator =
-                ValueTranslator.booleanToString(trueValue, falseValue);
-        assertEquals(trueValue, translator.apply(true));
-        assertEquals(falseValue, translator.apply(false));
+    void booleanToStringTest() {
+        final String trueValue = "someStr";
+        final String falseValue = "negated";
+        assertThrows(NullPointerException.class, () -> ValueTranslator.booleanToString(null, falseValue));
+        assertThrows(NullPointerException.class, () -> ValueTranslator.booleanToString(trueValue, null));
+        assertThrows(NullPointerException.class, () -> ValueTranslator.booleanToString(null, null));
+        final ValueTranslator<Boolean, String> translator = ValueTranslator.booleanToString(trueValue, falseValue);
+        assertNotNull(translator);
+        assertSame(trueValue, translator.apply(true));
+        assertSame(falseValue, translator.apply(false));
         assertNull(translator.apply(null));
     }
 
+    /**
+     * Test for {@link ValueTranslator#stringToBoolean(String)}.
+     */
     @Test
-    void testBeanUtilsBased() {
-        final ConvertUtilsBean convertUtils = mock(ConvertUtilsBean.class);
-        final BeanUtilsBean beanUtils =  new BeanUtilsBean(convertUtils);
-        BeanUtilsBean beanUtilsBck = BeanUtilsBean.getInstance();
-        final Object value = new Object();
-        final SimpleType expectedResult = mock(SimpleType.class);
-        willReturn(expectedResult).given(convertUtils).convert(value, SimpleType.class);
-        BeanUtilsBean.setInstance(beanUtils);
-        try {
-            final ValueTranslator<Object, SimpleType> translator =
-                    ValueTranslator.beanUtilsBased(SimpleType.class);
-            assertSame(expectedResult, translator.apply(value));
-        } finally {
-            BeanUtilsBean.setInstance(beanUtilsBck);
-        }
-        then(convertUtils).should().convert(value, SimpleType.class);
-    }
-
-    @Test
-    void testBeanUtilsBased_Bean() {
-        final ConvertUtilsBean convertUtils = mock(ConvertUtilsBean.class);
-        final ValueTranslator<Object, SimpleType> translator =
-                ValueTranslator.beanUtilsBased(convertUtils, SimpleType.class);
-        final Object value = new Object();
-        final SimpleType expectedResult = mock(SimpleType.class);
-        willReturn(expectedResult).given(convertUtils).convert(value, SimpleType.class);
-        assertSame(expectedResult, translator.apply(value));
-        then(convertUtils).should().convert(value, SimpleType.class);
-    }
-
-    @Test
-    void testSTR_TO_BOOL() {
-        final ValueTranslator<String, Boolean> translator =
-                ValueTranslator.STR_TO_BOOL;
-        assertTrue(translator.apply("true"));
-        assertTrue(translator.apply("TrUe"));
-        assertTrue(translator.apply("TRUE"));
+    void stringToBooleanTest() {
+        final String trueValue = "someStr";
+        final String falseValue = "negatedValue";
+        assertThrows(NullPointerException.class, () -> ValueTranslator.stringToBoolean(null));
+        final ValueTranslator<String, Boolean> translator = ValueTranslator.stringToBoolean(trueValue);
+        assertNotNull(translator);
+        assertTrue(translator.apply(trueValue));
+        assertTrue(translator.apply(trueValue.toLowerCase()));
+        assertTrue(translator.apply(trueValue.toUpperCase()));
+        assertFalse(translator.apply(falseValue));
+        assertFalse(translator.apply(falseValue.toLowerCase()));
+        assertFalse(translator.apply(falseValue.toUpperCase()));
         assertNull(translator.apply(null));
-        assertFalse(translator.apply("false"));
-        assertFalse(translator.apply("fAlSe"));
-        assertFalse(translator.apply("FALSE"));
-        assertFalse(translator.apply("other value"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#BOOL_TO_STR}.
+     */
     @Test
-    void testBOOL_TO_STR() {
-        final ValueTranslator<Boolean, String> translator =
-                ValueTranslator.BOOL_TO_STR;
+    void boolToStrTest() {
+        final ValueTranslator<Boolean, String> translator = ValueTranslator.BOOL_TO_STR;
+        assertNotNull(translator);
         assertEquals("true", translator.apply(true));
         assertEquals("false", translator.apply(false));
         assertNull(translator.apply(null));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_BOOL}.
+     */
     @Test
-    void testSTR_TO_BYTE() {
-        final ValueTranslator<String, Byte> translator =
-                ValueTranslator.STR_TO_BYTE;
-        assertEquals(Byte.MAX_VALUE, translator.apply(Byte.toString(Byte.MAX_VALUE)));
-        assertEquals((byte) 100, translator.apply("100"));
-        assertEquals((byte) 10, translator.apply("10"));
-        assertEquals((byte) 0, translator.apply("0"));
-        assertEquals((byte) -10, translator.apply("-10"));
-        assertEquals((byte) -100, translator.apply("-100"));
+    void strToBoolTest() {
+        final ValueTranslator<String, Boolean> translator = ValueTranslator.STR_TO_BOOL;
+        assertNotNull(translator);
+        assertTrue(translator.apply("true"));
+        assertTrue(translator.apply("TRUE"));
+        assertTrue(translator.apply("tRuE"));
+        assertFalse(translator.apply("false"));
+        assertFalse(translator.apply("FALSE"));
+        assertFalse(translator.apply("fAlSe"));
+        assertFalse(translator.apply("Something else"));
+        assertNull(translator.apply(null));
+    }
+
+    /**
+     * Test for {@link ValueTranslator#STR_TO_BYTE}.
+     */
+    @Test
+    void strToByteTest() {
+        final ValueTranslator<String, Byte> translator = ValueTranslator.STR_TO_BYTE;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Byte.MIN_VALUE, translator.apply(Byte.toString(Byte.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Byte.MAX_VALUE, translator.apply(Byte.toString(Byte.MAX_VALUE)));
+        assertEquals((byte) 0, translator.apply("0"));
+        assertEquals((byte) 1, translator.apply("1"));
+        assertEquals((byte) -1, translator.apply("-1"));
+        byte value = (byte) RandomUtils.nextInt();
+        assertEquals(value, translator.apply(Byte.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply("128"));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_SHORT}.
+     */
     @Test
-    void testSTR_TO_SHORT() {
-        final ValueTranslator<String, Short> translator =
-                ValueTranslator.STR_TO_SHORT;
-        assertEquals(Short.MAX_VALUE, translator.apply(Short.toString(Short.MAX_VALUE)));
-        assertEquals((short) 10000, translator.apply("10000"));
-        assertEquals((short) 10, translator.apply("10"));
-        assertEquals((short) 0, translator.apply("0"));
-        assertEquals((short) -10, translator.apply("-10"));
-        assertEquals((short) -10000, translator.apply("-10000"));
+    void strToShortTest() {
+        final ValueTranslator<String, Short> translator = ValueTranslator.STR_TO_SHORT;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Short.MIN_VALUE, translator.apply(Short.toString(Short.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Short.MAX_VALUE, translator.apply(Short.toString(Short.MAX_VALUE)));
+        assertEquals((short) 0, translator.apply("0"));
+        assertEquals((short) 1, translator.apply("1"));
+        assertEquals((short) -1, translator.apply("-1"));
+        short value = (short) RandomUtils.nextInt();
+        assertEquals(value, translator.apply(Short.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply("32768"));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_INT}.
+     */
     @Test
-    void testSTR_TO_INT() {
-        final ValueTranslator<String, Integer> translator =
-                ValueTranslator.STR_TO_INT;
-        assertEquals(Integer.MAX_VALUE, translator.apply(Integer.toString(Integer.MAX_VALUE)));
-        assertEquals((int) 1000000, translator.apply("1000000"));
-        assertEquals((int) 10, translator.apply("10"));
-        assertEquals((int) 0, translator.apply("0"));
-        assertEquals((int) -10, translator.apply("-10"));
-        assertEquals((int) -1000000, translator.apply("-1000000"));
+    void strToIntTest() {
+        final ValueTranslator<String, Integer> translator = ValueTranslator.STR_TO_INT;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Integer.MIN_VALUE, translator.apply(Integer.toString(Integer.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Integer.MAX_VALUE, translator.apply(Integer.toString(Integer.MAX_VALUE)));
+        assertEquals(0, translator.apply("0"));
+        assertEquals(1, translator.apply("1"));
+        assertEquals(-1, translator.apply("-1"));
+        int value = RandomUtils.nextInt();
+        assertEquals(value, translator.apply(Integer.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply(String.valueOf(Long.MAX_VALUE)));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_LONG}.
+     */
     @Test
-    void testSTR_TO_LONG() {
-        final ValueTranslator<String, Long> translator =
-                ValueTranslator.STR_TO_LONG;
-        assertEquals(Long.MAX_VALUE, translator.apply(Long.toString(Long.MAX_VALUE)));
-        assertEquals(100000000000L, translator.apply("100000000000"));
-        assertEquals(10L, translator.apply("10"));
-        assertEquals(0L, translator.apply("0"));
-        assertEquals(-10L, translator.apply("-10"));
-        assertEquals(-100000000000L, translator.apply("-100000000000"));
+    void strToLongTest() {
+        final ValueTranslator<String, Long> translator = ValueTranslator.STR_TO_LONG;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Long.MIN_VALUE, translator.apply(Long.toString(Long.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Long.MAX_VALUE, translator.apply(Long.toString(Long.MAX_VALUE)));
+        assertEquals(0l, translator.apply("0"));
+        assertEquals(1l, translator.apply("1"));
+        assertEquals(-1l, translator.apply("-1"));
+        long value = RandomUtils.nextLong();
+        assertEquals(value, translator.apply(Long.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply(String.valueOf(
+                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(2)))));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_FLOAT}.
+     */
     @Test
-    void testSTR_TO_FLOAT() {
-        final ValueTranslator<String, Float> translator =
-                ValueTranslator.STR_TO_FLOAT;
-        assertEquals(Float.MAX_VALUE, translator.apply(Float.toString(Float.MAX_VALUE)));
-        assertEquals(100000000000f, translator.apply("100000000000"));
-        assertEquals(10f, translator.apply("10"));
-        assertEquals(0f, translator.apply("0"));
-        assertEquals(-10f, translator.apply("-10"));
-        assertEquals(-100000000000f, translator.apply("-100000000000"));
+    void strToFloatTest() {
+        final ValueTranslator<String, Float> translator = ValueTranslator.STR_TO_FLOAT;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Float.MIN_VALUE, translator.apply(Float.toString(Float.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Float.MAX_VALUE, translator.apply(Float.toString(Float.MAX_VALUE)));
+        assertEquals(0f, translator.apply("0"));
+        assertEquals(1f, translator.apply("1"));
+        assertEquals(-1f, translator.apply("-1"));
+        float value = RandomUtils.nextFloat();
+        assertEquals(value, translator.apply(Float.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_DOUBLE}.
+     */
     @Test
-    void testSTR_TO_DOUBLE() {
-        final ValueTranslator<String, Double> translator =
-                ValueTranslator.STR_TO_DOUBLE;
-        assertEquals(Double.MAX_VALUE, translator.apply(Double.toString(Double.MAX_VALUE)));
-        assertEquals(100000000000d, translator.apply("100000000000"));
-        assertEquals(10d, translator.apply("10"));
-        assertEquals(0d, translator.apply("0"));
-        assertEquals(-10d, translator.apply("-10"));
-        assertEquals(-100000000000d, translator.apply("-100000000000"));
+    void strToDoubleTest() {
+        final ValueTranslator<String, Double> translator = ValueTranslator.STR_TO_DOUBLE;
+        assertNotNull(translator);
+        assertNull(translator.apply(null));
         assertEquals(Double.MIN_VALUE, translator.apply(Double.toString(Double.MIN_VALUE)));
-        assertNull(translator.apply(null));
+        assertEquals(Double.MAX_VALUE, translator.apply(Double.toString(Double.MAX_VALUE)));
+        assertEquals(0d, translator.apply("0"));
+        assertEquals(1d, translator.apply("1"));
+        assertEquals(-1d, translator.apply("-1"));
+        double value = RandomUtils.nextDouble();
+        assertEquals(value, translator.apply(Double.toString(value)));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_BIG_INT}.
+     */
     @Test
-    void testSTR_TO_BIG_INT() {
-        final ValueTranslator<String, BigInteger> translator =
-                ValueTranslator.STR_TO_BIG_INT;
-        assertEquals(BigInteger.valueOf(100000000000L), translator.apply("100000000000"));
-        assertEquals(BigInteger.valueOf(10L), translator.apply("10"));
-        assertEquals(BigInteger.valueOf(0L), translator.apply("0"));
-        assertEquals(BigInteger.valueOf(-10L), translator.apply("-10"));
-        assertEquals(BigInteger.valueOf(-100000000000L), translator.apply("-100000000000"));
+    void strToBigIntTest() {
+        final ValueTranslator<String, BigInteger> translator = ValueTranslator.STR_TO_BIG_INT;
+        assertNotNull(translator);
         assertNull(translator.apply(null));
+        assertEquals(BigInteger.ZERO, translator.apply("0"));
+        assertEquals(BigInteger.ONE, translator.apply("1"));
+        assertEquals(BigInteger.valueOf(-1), translator.apply("-1"));
+        BigInteger value = new BigInteger(RandomUtils.nextBytes(100));
+        assertEquals(value, translator.apply(value.toString()));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#STR_TO_BIG_DEC}.
+     */
     @Test
-    void testSTR_TO_BIG_DEC() {
-        final ValueTranslator<String, BigDecimal> translator =
-                ValueTranslator.STR_TO_BIG_DEC;
-        assertEquals(BigDecimal.valueOf(100000000000L), translator.apply("100000000000"));
-        assertEquals(BigDecimal.valueOf(10L), translator.apply("10"));
-        assertEquals(BigDecimal.valueOf(0L), translator.apply("0"));
-        assertEquals(BigDecimal.valueOf(-10L), translator.apply("-10"));
-        assertEquals(BigDecimal.valueOf(-100000000000L), translator.apply("-100000000000"));
+    void strToBigDecTest() {
+        final ValueTranslator<String, BigDecimal> translator = ValueTranslator.STR_TO_BIG_DEC;
+        assertNotNull(translator);
         assertNull(translator.apply(null));
+        assertEquals(BigDecimal.ZERO, translator.apply("0"));
+        assertEquals(BigDecimal.ONE, translator.apply("1"));
+        assertEquals(BigDecimal.valueOf(-1), translator.apply("-1"));
+        BigDecimal value = new BigDecimal(
+                new BigInteger(RandomUtils.nextBytes(100)),
+                RandomUtils.nextInt());
+        assertEquals(value, translator.apply(value.toString()));
+        assertThrows(NumberFormatException.class, () -> translator.apply("NotANumber"));
     }
 
+    /**
+     * Test for {@link ValueTranslator#NUMBER_TO_STR}.
+     */
     @Test
-    void testNUMBER_TO_STR() {
-        final ValueTranslator<Number, String> translator =
-                ValueTranslator.NUMBER_TO_STR;
-        assertEquals("100", translator.apply((byte) 100));
-        assertEquals("10000", translator.apply((short) 10000));
-        assertEquals("1000000", translator.apply((int) 1000000));
-        assertEquals("100000000000", translator.apply(100000000000L));
+    void numberToStrTest() {
+        final ValueTranslator<Number, String> translator = ValueTranslator.NUMBER_TO_STR;
         assertNull(translator.apply(null));
+        assertEquals(String.valueOf(Byte.MIN_VALUE), translator.apply(Byte.MIN_VALUE));
+        assertEquals(String.valueOf(Short.MIN_VALUE), translator.apply(Short.MIN_VALUE));
+        assertEquals(String.valueOf(Integer.MIN_VALUE), translator.apply(Integer.MIN_VALUE));
+        assertEquals(String.valueOf(Float.MIN_VALUE), translator.apply(Float.MIN_VALUE));
+        assertEquals(String.valueOf(Double.MIN_VALUE), translator.apply(Double.MIN_VALUE));
+        assertEquals(String.valueOf(Byte.MAX_VALUE), translator.apply(Byte.MAX_VALUE));
+        assertEquals(String.valueOf(Short.MAX_VALUE), translator.apply(Short.MAX_VALUE));
+        assertEquals(String.valueOf(Integer.MAX_VALUE), translator.apply(Integer.MAX_VALUE));
+        assertEquals(String.valueOf(Float.MAX_VALUE), translator.apply(Float.MAX_VALUE));
+        assertEquals(String.valueOf(Double.MAX_VALUE), translator.apply(Double.MAX_VALUE));
     }
+
+    /**
+     * Test for {@link ValueTranslator#beanUtilsBased(Class)}.
+     */
+    @Test
+    void beanUtilsBasedTest() {
+        final BeanUtilsBean backup = BeanUtilsBean.getInstance();
+        try {
+            final ConvertUtilsBean sharedInstance = mock(ConvertUtilsBean.class);
+            BeanUtilsBean.setInstance(new BeanUtilsBean(sharedInstance));
+            final ValueTranslator<SourceType, TargetType> translator = ValueTranslator.beanUtilsBased(TargetType.class);
+            final SourceType value = mock(SourceType.class);
+            final TargetType expected = mock(TargetType.class);
+            willReturn(expected).given(sharedInstance).convert(value, TargetType.class);
+            final TargetType result = translator.apply(value);
+            assertSame(expected, result);
+            then(sharedInstance).should().convert(value, TargetType.class);
+        } finally {
+            BeanUtilsBean.setInstance(backup);
+        }
+    }
+
+    /**
+     * Test for {@link ValueTranslator#beanUtilsBased(ConvertUtilsBean, Class)}.
+     */
+    @Test
+    void beanUtilsBasedInstanceTest() {
+        final ConvertUtilsBean instance = mock(ConvertUtilsBean.class);
+        final ValueTranslator<SourceType, TargetType> translator = ValueTranslator.beanUtilsBased(instance, TargetType.class);
+        final SourceType value = mock(SourceType.class);
+        final TargetType expected = mock(TargetType.class);
+        willReturn(expected).given(instance).convert(value, TargetType.class);
+        final TargetType result = translator.apply(value);
+        assertSame(expected, result);
+        then(instance).should().convert(value, TargetType.class);
+    }
+
+    /**
+     * Test for {@link ValueTranslator#beanUtilsBased(ConvertUtilsBean2, Class)}.
+     */
+    @Test
+    void beanUtilsBasedInstance2Test() {
+        final ConvertUtilsBean2 instance = mock(ConvertUtilsBean2.class);
+        final ValueTranslator<SourceType, TargetType> translator = ValueTranslator.beanUtilsBased(instance, TargetType.class);
+        final SourceType value = mock(SourceType.class);
+        final TargetType expected = mock(TargetType.class);
+        willReturn(expected).given(instance).convert(value, TargetType.class);
+        final TargetType result = translator.apply(value);
+        assertSame(expected, result);
+        then(instance).should().convert(value, TargetType.class);
+    }
+
+    private static interface SourceType {}
+    private static interface TargetType {}
 }

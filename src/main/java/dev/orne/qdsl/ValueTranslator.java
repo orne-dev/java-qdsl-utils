@@ -30,6 +30,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.ConvertUtilsBean2;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -117,7 +118,7 @@ extends Function<S, T> {
      * @return The created value translator
      */
     static <S, T> ValueTranslator<S, T> beanUtilsBased(
-            final Class<T> type) {
+            final @NotNull Class<T> type) {
         return beanUtilsBased(BeanUtilsBean.getInstance().getConvertUtils(), type);
     }
 
@@ -132,8 +133,28 @@ extends Function<S, T> {
      * @return The created value translator
      */
     static <S, T> ValueTranslator<S, T> beanUtilsBased(
-            final ConvertUtilsBean converter,
-            final Class<T> type) {
+            final @NotNull ConvertUtilsBean converter,
+            final @NotNull Class<T> type) {
+        Validate.notNull(converter);
+        Validate.notNull(type);
+        return e -> type.cast(converter.convert(e, type));
+    }
+
+    /**
+     * Creates a new value translator that uses specified Apache BeanUtils
+     * {@code ConvertUtilsBean2} instance to convert the values.
+     * 
+     * @param <S> The source value type
+     * @param <T> The target value type
+     * @param converter The instance to use to convert the values 
+     * @param type The target value type
+     * @return The created value translator
+     */
+    static <S, T> ValueTranslator<S, T> beanUtilsBased(
+            final @NotNull ConvertUtilsBean2 converter,
+            final @NotNull Class<T> type) {
+        Validate.notNull(converter);
+        Validate.notNull(type);
         return e -> type.cast(converter.convert(e, type));
     }
 }
