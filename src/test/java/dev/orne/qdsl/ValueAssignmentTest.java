@@ -108,13 +108,11 @@ class ValueAssignmentTest {
         final String value = "Test value";
         final ValueAssignment<String> assignment =
                 ValueAssignment.of(PROPERTY_A_PATH, value);
-        final TranslateVisitor translateVisitor = mock(TranslateVisitor.class);
+        final ValueAssignmentReplaceVisitor<?> translateVisitor = mock(ValueAssignmentReplaceVisitor.class);
         final ValueAssignments expected = mock(ValueAssignments.class);
-        willReturn(expected).given(translateVisitor).visit(assignment, TranslateVisitor.Context.STORE);
-        final ValueAssignments result = assignment.accept(
-                translateVisitor,
-                TranslateVisitor.Context.STORE);
-        then(translateVisitor).should().visit(assignment, TranslateVisitor.Context.STORE);
+        willReturn(expected).given(translateVisitor).visit(assignment, null);
+        final ValueAssignments result = assignment.accept(translateVisitor, null);
+        then(translateVisitor).should().visit(assignment, null);
         assertSame(expected, result);
     }
 

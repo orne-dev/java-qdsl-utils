@@ -41,22 +41,25 @@ import com.querydsl.core.types.ParamExpression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.TemplateExpression;
+import com.querydsl.core.types.Visitor;
 
 /**
- * QueryDSL expression visitor that allows translate both expressions and value
- * assignments.
+ * QueryDSL expression replace visitor that allows translate vanilla
+ * expressions, order specifiers and value assignments.
  * <p>
  * Delegates in nested visitors, in order.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-09
+ * @version 1.0, 2021-12
  * @since 0.1
  */
-public class DelegatedTranslateVisitor
-extends TranslateVisitor {
+public class ChainedReplaceVisitor
+implements Visitor<Expression<?>, Void>,
+        OrderSpecifierVisitor<OrderSpecifier<?>[], Void>,
+        ValueAssignmentVisitor<ValueAssignments, Void> {
 
     /** The delegated visitors. */
-    private final List<TranslateVisitor> visitors;
+    private final List<Visitor<Expression<?>, ?>> visitors;
 
     /**
      * Creates a new instance.
@@ -64,8 +67,8 @@ extends TranslateVisitor {
      * @param visitors The delegated visitors
      */
     @SafeVarargs
-    public DelegatedTranslateVisitor(
-            final TranslateVisitor... visitors) {
+    public ChainedReplaceVisitor(
+            final Visitor<Expression<?>, ?>... visitors) {
         this(Arrays.asList(Validate.notNull(visitors)));
     }
 
@@ -74,8 +77,8 @@ extends TranslateVisitor {
      * 
      * @param visitors The delegated visitors
      */
-    public DelegatedTranslateVisitor(
-            final Collection<TranslateVisitor> visitors) {
+    public ChainedReplaceVisitor(
+            final Collection<Visitor<Expression<?>, ?>> visitors) {
         super();
         this.visitors = new ArrayList<>(Validate.notNull(visitors));
         Validate.noNullElements(visitors);
@@ -86,7 +89,7 @@ extends TranslateVisitor {
      * 
      * @return The delegated visitors
      */
-    protected List<TranslateVisitor> getVisitors() {
+    protected List<Visitor<Expression<?>, ?>> getVisitors() {
         return Collections.unmodifiableList(this.visitors);
     }
 
@@ -96,10 +99,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final Constant<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -110,10 +113,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final FactoryExpression<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -124,10 +127,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final Operation<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -138,10 +141,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final ParamExpression<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -152,10 +155,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final Path<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -166,10 +169,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final SubQueryExpression<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -180,10 +183,10 @@ extends TranslateVisitor {
     @Override
     public Expression<?> visit(
             final TemplateExpression<?> expr,
-            final Context context) {
+            final Void context) {
         Expression<?> result = expr;
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.accept(visitor, context);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            result = result.accept(visitor, null);
         }
         return result;
     }
@@ -194,14 +197,24 @@ extends TranslateVisitor {
     @Override
     public OrderSpecifier<?>[] visit(
             final @NotNull OrderSpecifier<?> order,
-            final Context context) {
+            final Void context) {
         OrderSpecifier<?>[] result = new OrderSpecifier<?>[] { order };
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = Arrays.asList(result)
-                    .parallelStream()
-                    .map(e -> visitor.visit(e, context))
-                    .flatMap(r -> Arrays.asList(r).stream())
-                    .toArray(OrderSpecifier<?>[]::new);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            if (visitor instanceof OrderSpecifierReplaceVisitor) {
+                final OrderSpecifierReplaceVisitor<?> ovisitor =
+                        (OrderSpecifierReplaceVisitor<?>) visitor;
+                result = Arrays.asList(result)
+                        .parallelStream()
+                        .map(e -> ovisitor.visit(e, null))
+                        .flatMap(r -> Arrays.asList(r).stream())
+                        .toArray(OrderSpecifier<?>[]::new);
+            } else {
+                result = Arrays.asList(result)
+                        .parallelStream()
+                        .map(p -> OrderSpecifierReplaceVisitor.fromComponents(p, visitor))
+                        .flatMap(r -> Arrays.asList(r).stream())
+                        .toArray(OrderSpecifier<?>[]::new);
+            }
         }
         return result;
     }
@@ -212,15 +225,26 @@ extends TranslateVisitor {
     @Override
     public @NotNull ValueAssignments visit(
             final @NotNull ValueAssignment<?> vexpr,
-            final Context context) {
+            final Void context) {
         ValueAssignments result = ValueAssignments.of(vexpr);
-        for (final TranslateVisitor visitor : this.visitors) {
-            result = result.parallelStream()
-                .map(p -> visitor.visit(p, context))
-                .collect(
-                        ValueAssignments::new,
-                        ValueAssignments::addAll,
-                        ValueAssignments::addAll);
+        for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
+            if (visitor instanceof ValueAssignmentReplaceVisitor) {
+                final ValueAssignmentReplaceVisitor<?> vvisitor =
+                        (ValueAssignmentReplaceVisitor<?>) visitor;
+                result = result.parallelStream()
+                        .map(p -> vvisitor.visit(p, null))
+                        .collect(
+                                ValueAssignments::new,
+                                ValueAssignments::addAll,
+                                ValueAssignments::addAll);
+            } else {
+                result = result.parallelStream()
+                        .map(p -> AssignmentTranslator.translateFromComponents(p, visitor))
+                        .collect(
+                                ValueAssignments::new,
+                                ValueAssignments::addAll,
+                                ValueAssignments::addAll);
+            }
         }
         return result;
     }

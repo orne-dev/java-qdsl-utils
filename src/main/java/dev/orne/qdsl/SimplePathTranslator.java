@@ -24,19 +24,47 @@ package dev.orne.qdsl;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.Validate;
+
+import com.querydsl.core.support.ReplaceVisitor;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 
 /**
  * Visitor that translates references to the source path with references to
- * the target path of the same type.
+ * the target path.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2021-10
  * @since 0.1
  */
 public class SimplePathTranslator<S>
-extends AbstractPathTranslator<S, S> {
+extends ReplaceVisitor<Void>
+implements ValueAssignmentReplaceVisitor<Void> {
+
+    /** The source path. */
+    private final @NotNull Path<S> source;
+    /** The target expression. */
+    private final @NotNull Expression<S> target;
+    /** The value assignment translator. */
+    private final @NotNull AssignmentTranslator<S> assignmentTranslator;
+
+    /**
+     * Creates a new instance.
+     * 
+     * @param source The source path
+     * @param target The target expression
+     * @param assignmentTranslator The value assignment translator
+     */
+    protected SimplePathTranslator(
+            final @NotNull Path<S> source,
+            final @NotNull Expression<S> target,
+            final @NotNull AssignmentTranslator<S> assignmentTranslator) {
+        super();
+        this.source = Validate.notNull(source);
+        this.target = Validate.notNull(target);
+        this.assignmentTranslator = Validate.notNull(assignmentTranslator);
+    }
 
     /**
      * Builder constructor.
@@ -45,7 +73,68 @@ extends AbstractPathTranslator<S, S> {
      */
     protected SimplePathTranslator(
             final @NotNull Builder<S> builder) {
-        super(builder);
+        super();
+        Validate.notNull(builder);
+        this.source = builder.getSource();
+        this.target = builder.getTarget();
+        this.assignmentTranslator = builder.getAssignmentTranslator();
+    }
+
+    /**
+     * Returns the source path.
+     * 
+     * @return The source path
+     */
+    public @NotNull Path<S> getSource() {
+        return this.source;
+    }
+
+    /**
+     * Returns the target expression.
+     * 
+     * @return The target expression
+     */
+    public @NotNull Expression<S> getTarget() {
+        return this.target;
+    }
+
+    /**
+     * Returns the value assignment translator.
+     * 
+     * @return The value assignment translator
+     */
+    public @NotNull AssignmentTranslator<S> getAssignmentTranslator() {
+        return assignmentTranslator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Expression<?> visit(
+            final Path<?> expr,
+            final Void context) {
+        if (this.source.equals(expr))  {
+            return this.target;
+        } else {
+            return super.visit(expr, context);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull ValueAssignments visit(
+            final @NotNull ValueAssignment<?> vexpr,
+            final Void context) {
+        if (this.source.equals(vexpr.getPath())) {
+            @SuppressWarnings("unchecked")
+            final Expression<S> value = (Expression<S>) vexpr.getValue();
+            return this.assignmentTranslator.apply(value);
+        } else {
+            return ValueAssignments.of(vexpr);
+        }
     }
 
     public static <V> TargetBuilder<V> fromPath(
@@ -95,6 +184,7 @@ extends AbstractPathTranslator<S, S> {
         /**
          * Set a simple value assignment translation.
          * 
+         * @param <T> The target path type
          * @param target The target path
          * @param translator The value expression translator
          * @return The next step builder
@@ -102,6 +192,15 @@ extends AbstractPathTranslator<S, S> {
         @NotNull <T> FinalBuilder<S> storingTo(
                 @NotNull Path<T> target,
                 @NotNull ExpressionTranslator<S, T> translator);
+
+        /**
+         * Set a value assignment translator.
+         * 
+         * @param translator The value assignment translator
+         * @return The next step builder
+         */
+        @NotNull FinalBuilder<S> storingWith(
+                @NotNull AssignmentTranslator<S> translator);
     }
 
     /**
@@ -131,17 +230,71 @@ extends AbstractPathTranslator<S, S> {
      * @since 0.1
      */
     protected static class Builder<S>
-    extends AbstractPathTranslator.Builder<S, S>
     implements TargetBuilder<S>, StoreBuilder<S>, FinalBuilder<S> {
+
+        /** The source path. */
+        private final @NotNull Path<S> source;
+        /** The target expression. */
+        private Expression<S> target;
+        /** The value assignment translator. */
+        private AssignmentTranslator<S> assignmentTranslator;
 
         /**
          * Creates a new instance.
          * 
          * @param source The source path
          */
-        public Builder(
+        protected Builder(
                 final @NotNull Path<S> source) {
-            super(source);
+            super();
+            this.source = Validate.notNull(source);
+        }
+
+        /**
+         * Returns the source path.
+         * 
+         * @return The source path
+         */
+        protected Path<S> getSource() {
+            return this.source;
+        }
+
+        /**
+         * Returns the target expression.
+         * 
+         * @return The target expression
+         */
+        protected Expression<S> getTarget() {
+            return this.target;
+        }
+
+        /**
+         * Sets the target expression.
+         * 
+         * @param target The target expression
+         */
+        protected void setTarget(
+                final @NotNull Expression<S> target) {
+            this.target = target;
+        }
+
+        /**
+         * Returns the value assignment translator.
+         * 
+         * @return The value assignment translator
+         */
+        protected AssignmentTranslator<S> getAssignmentTranslator() {
+            return this.assignmentTranslator;
+        }
+
+        /**
+         * Sets the value assignment translator.
+         * 
+         * @param translator The value assignment translator
+         */
+        protected void setAssignmentTranslator(
+                final @NotNull AssignmentTranslator<S> translator) {
+            this.assignmentTranslator = translator;
         }
 
         /**
@@ -173,6 +326,16 @@ extends AbstractPathTranslator<S, S> {
                 final @NotNull Path<T> target,
                 final @NotNull ExpressionTranslator<S, T> translator) {
             setAssignmentTranslator(AssignmentTranslator.forPath(target, translator));
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public @NotNull Builder<S> storingWith(
+                final @NotNull AssignmentTranslator<S> translator) {
+            setAssignmentTranslator(translator);
             return this;
         }
 

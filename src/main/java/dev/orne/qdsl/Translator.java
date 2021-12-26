@@ -34,16 +34,17 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Visitor;
 
 /**
  * QueryDSL expression translator.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-09
+ * @version 1.0, 2021-12
  * @since 0.1
  */
 public class Translator
-extends DelegatedTranslateVisitor {
+extends ChainedReplaceVisitor {
 
     /**
      * Creates a new instance.
@@ -52,7 +53,7 @@ extends DelegatedTranslateVisitor {
      */
     @SafeVarargs
     public Translator(
-            final TranslateVisitor... visitors) {
+            final Visitor<Expression<?>, ?>... visitors) {
         super(visitors);
     }
 
@@ -62,7 +63,7 @@ extends DelegatedTranslateVisitor {
      * @param visitors The delegated translators
      */
     public Translator(
-            final List<TranslateVisitor> visitors) {
+            final List<Visitor<Expression<?>, ?>> visitors) {
         super(visitors);
     }
 
@@ -71,8 +72,9 @@ extends DelegatedTranslateVisitor {
      * 
      * @param visitors The delegated translators
      */
+    @SafeVarargs
     public static Translator with(
-            final TranslateVisitor... visitors) {
+            final Visitor<Expression<?>, ?>... visitors) {
         return new Translator(visitors);
     }
 
@@ -141,7 +143,7 @@ extends DelegatedTranslateVisitor {
     @SuppressWarnings("unchecked")
     public @NotNull <U> Expression<U> translateProjection(
             final Expression<U> expr) {
-        final Expression<?> result = expr.accept(this, Context.PROJECTION);
+        final Expression<?> result = expr.accept(this, null);
         Validate.notNull(result);
         Validate.isTrue(expr.getType().isAssignableFrom(result.getType()));
         return (Expression<U>) result;
@@ -169,7 +171,7 @@ extends DelegatedTranslateVisitor {
      */
     public @NotNull Predicate translatePredicate(
             final @NotNull Predicate expr) {
-        return (Predicate) expr.accept(this, Context.PREDICATE);
+        return (Predicate) expr.accept(this, null);
     }
 
     /**
@@ -195,7 +197,7 @@ extends DelegatedTranslateVisitor {
      */
     public @NotNull OrderSpecifier<?>[] translateOrderSpecifier(
             final @NotNull OrderSpecifier<?> order) {
-        return this.visit(order, Context.ORDER);
+        return this.visit(order, null);
     }
 
     /**
@@ -233,6 +235,6 @@ extends DelegatedTranslateVisitor {
      */
     public @NotNull ValueAssignments translateAssigment(
             final @NotNull ValueAssignment<?> assigment) {
-        return assigment.accept(this, Context.STORE);
+        return assigment.accept(this, null);
     }
 }

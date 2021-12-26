@@ -35,8 +35,6 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.Expressions;
 
-import dev.orne.qdsl.TranslateVisitor.Context;
-
 /**
  * Value assignment bean for store (create, update) operations.
  * 
@@ -95,6 +93,31 @@ public class ValueAssignment<V> {
     }
 
     /**
+     * Creates a new typed instance for the specified target path
+     * validating that the assigned value is of a compatible type.
+     * 
+     * @param <T> The path type
+     * @param target The path of the property to assign
+     * @param value The assigned value
+     * @return The value to be assigned
+     * @throws IllegalArgumentException If the assigned value is not of a
+     * compatible type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ValueAssignment<T> fromUntyped(
+            final Path<T> target,
+            final Expression<?> value) {
+        if (target.getType().isAssignableFrom(value.getType())) {
+            return new ValueAssignment<T>(target, (Expression<? extends T>) value);
+        } else {
+            throw new IllegalArgumentException(String.format(
+                    "Replaced assigned expression for path %s is not of expected type: %s",
+                    target,
+                    value));
+        }
+    }
+
+    /**
      * Returns the path of the property to assign.
      * 
      * @return The path of the property to assign
@@ -115,13 +138,15 @@ public class ValueAssignment<V> {
     /**
      * Accept the visitor with the given context.
      *
+     * @param <R> return type
+     * @param <C> context type
      * @param v The translation visitor
      * @param context The context of visit
      * @return The result of the visit
      */
-    public @NotNull ValueAssignments accept(
-            final @NotNull TranslateVisitor visitor,
-            final Context context) {
+    public @NotNull <R, C> R accept(
+            final @NotNull ValueAssignmentVisitor<R, C> visitor,
+            final C context) {
         return visitor.visit(this, context);
     }
 

@@ -1,5 +1,7 @@
 package dev.orne.qdsl;
 
+import java.util.Objects;
+
 /*-
  * #%L
  * Orne Querydsl Utils
@@ -31,6 +33,7 @@ import org.apache.commons.lang3.Validate;
 import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Visitor;
 import com.querydsl.core.types.dsl.Expressions;
 
 /**
@@ -159,6 +162,38 @@ extends Function<Expression<S>, ValueAssignments> {
      */
     static <S> AssignmentTranslator<S> fromSimple(Simple<S> simple) {
         return e -> ValueAssignments.of(simple.apply(e));
+    }
+
+    /**
+     * Tries to translate the value assignment translating its target path and
+     * value with the specified replace visitor.
+     * 
+     * @param from The source value assignment
+     * @param visitor The replace visitor to use
+     * @return The resulting value assignment
+     * @throws IllegalArgumentException If the assigned value is not of a
+     * compatible type
+     */
+    static ValueAssignment<?> translateFromComponents(
+            final ValueAssignment<?> from,
+            final Visitor<Expression<?>, ?> visitor) {
+        final Expression<?> newTarget = from.getPath().accept(visitor, null);
+        final Expression<?> newValue = from.getValue().accept(visitor, null);
+        final ValueAssignment<?> result;
+        if (newTarget == null) {
+            result = null;
+        } else if (from.getPath().equals(newTarget) &&
+                Objects.equals(from.getValue(), newValue)) {
+            result = from;
+        } else if (newTarget instanceof Path) {
+            return ValueAssignment.fromUntyped((Path<?>) newTarget, newValue);
+        } else {
+            throw new IllegalArgumentException(String.format(
+                    "Replacement expression for path %s is not a path: %s",
+                    from.getPath(),
+                    newTarget));
+        }
+        return result;
     }
 
     /**
