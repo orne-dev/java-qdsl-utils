@@ -189,10 +189,10 @@ implements Cloneable,
      * @return The value to which the specified path is assigned,
      * or {@code null} if this instance contains no assignment for the path
      */
-    public <T> Expression<T> get(
+    public <T> Expression<? extends T> get(
             final @NotNull Path<T> path) {
         @SuppressWarnings("unchecked")
-        final Expression<T> result = (Expression<T>) this.assignments.get(path);
+        final Expression<? extends T> result = (Expression<? extends T>) this.assignments.get(path);
         return result;
     }
 
@@ -321,7 +321,7 @@ implements Cloneable,
      * @return The previous value assigned to the path,
      * or {@code null} if there was no assignment for the path
      */
-    public <T> Expression<T> addIfAbsent(
+    public <T> Expression<? extends T> addIfAbsent(
            final @NotNull ValueAssignment<T> assignment) {
         Validate.notNull(assignment);
         return addIfAbsent(assignment.getPath(), assignment.getValue());
@@ -338,7 +338,7 @@ implements Cloneable,
      * @return The previous value assigned to the path,
      * or {@code null} if there was no assignment for the path
      */
-    public <T> Expression<T> addIfAbsent(
+    public <T> Expression<? extends T> addIfAbsent(
            final @NotNull Path<T> path,
            final T value) {
         return addIfAbsent(path, value == null ? null : Expressions.constant(value));
@@ -355,11 +355,11 @@ implements Cloneable,
      * @return The previous value assigned to the path,
      * or {@code null} if there was no assignment for the path
      */
-    public <T> Expression<T> addIfAbsent(
+    public <T> Expression<? extends T> addIfAbsent(
            final @NotNull Path<T> path,
            final Expression<? extends T> value) {
         Validate.notNull(path);
-        final Expression<T> oldValue;
+        final Expression<? extends T> oldValue;
         if (contains(path)) {
             oldValue = get(path);
         } else {

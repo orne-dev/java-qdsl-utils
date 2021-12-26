@@ -321,7 +321,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentAssignment() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_A);
+        final Expression<? extends String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_A);
         assertNull(result);
         assertEquals(2, bean.size());
         assertEquals(VALUE_B, bean.get(PROPERTY_A_PATH));
@@ -334,7 +334,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentExistingAssignment() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_B);
+        final Expression<? extends String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_B);
         assertEquals(VALUE_A, result);
         assertEquals(1, bean.size());
         assertNull(bean.get(PROPERTY_A_PATH));
@@ -347,7 +347,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentPathValue() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(PROPERTY_A_PATH, STR_B);
+        final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_A_PATH, STR_B);
         assertNull(result);
         assertEquals(2, bean.size());
         assertEquals(VALUE_B, bean.get(PROPERTY_A_PATH));
@@ -360,7 +360,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentPathNullValue() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(PROPERTY_A_PATH, (String) null);
+        final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_A_PATH, (String) null);
         assertNull(result);
         assertEquals(2, bean.size());
         assertNull(bean.get(PROPERTY_A_PATH));
@@ -373,7 +373,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentExitingPathValue() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(PROPERTY_B_PATH, STR_B);
+        final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_B_PATH, STR_B);
         assertEquals(VALUE_A, result);
         assertEquals(1, bean.size());
         assertNull(bean.get(PROPERTY_A_PATH));
@@ -386,7 +386,7 @@ class ValueAssignmentsTest {
     void testAddIfAbsentExitingPathNullValue() {
         final ValueAssignments bean = ValueAssignments.of(
                 VALUE_A_ASSIGNMENT_B);
-        final Expression<String> result = bean.addIfAbsent(PROPERTY_B_PATH, (String) null);
+        final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_B_PATH, (String) null);
         assertEquals(VALUE_A, result);
         assertEquals(1, bean.size());
         assertNull(bean.get(PROPERTY_A_PATH));
