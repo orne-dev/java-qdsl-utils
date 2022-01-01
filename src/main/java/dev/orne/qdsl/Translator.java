@@ -23,7 +23,7 @@ package dev.orne.qdsl;
  */
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
@@ -63,7 +63,7 @@ extends ChainedReplaceVisitor {
      * @param visitors The delegated translators
      */
     public Translator(
-            final List<Visitor<Expression<?>, ?>> visitors) {
+            final Collection<Visitor<Expression<?>, ?>> visitors) {
         super(visitors);
     }
 
@@ -116,7 +116,9 @@ extends ChainedReplaceVisitor {
     public static <V> SimplePathTranslator<V> renamePath(
             final @NotNull Path<V> source,
             final @NotNull Path<V> target) {
-        return SimplePathTranslator.fromPath(source).toPath(target).build();
+        return SimplePathTranslator.fromPath(source)
+                .toPath(target)
+                .build();
     }
 
     /**

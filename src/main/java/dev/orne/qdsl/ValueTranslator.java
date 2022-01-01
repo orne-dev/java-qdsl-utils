@@ -46,23 +46,23 @@ public interface ValueTranslator<S, T>
 extends Function<S, T> {
 
     /** Value translator from {@code String} to {@code Byte}. */
-    ValueTranslator<String, Byte> STR_TO_BYTE = Byte::valueOf;
+    ValueTranslator<String, Byte> STR_TO_BYTE = s -> s == null ? null : Byte.valueOf(s);
     /** Value translator from {@code String} to {@code Short}. */
-    ValueTranslator<String, Short> STR_TO_SHORT = Short::valueOf;
+    ValueTranslator<String, Short> STR_TO_SHORT = s -> s == null ? null : Short.valueOf(s);
     /** Value translator from {@code String} to {@code Integer}. */
-    ValueTranslator<String, Integer> STR_TO_INT = Integer::valueOf;
+    ValueTranslator<String, Integer> STR_TO_INT = s -> s == null ? null : Integer.valueOf(s);
     /** Value translator from {@code String} to {@code Long}. */
-    ValueTranslator<String, Long> STR_TO_LONG = Long::valueOf;
+    ValueTranslator<String, Long> STR_TO_LONG = s -> s == null ? null : Long.valueOf(s);
     /** Value translator from {@code String} to {@code Float}. */
-    ValueTranslator<String, Float> STR_TO_FLOAT = Float::valueOf;
+    ValueTranslator<String, Float> STR_TO_FLOAT = s -> s == null ? null : Float.valueOf(s);
     /** Value translator from {@code String} to {@code Double}. */
-    ValueTranslator<String, Double> STR_TO_DOUBLE = Double::valueOf;
+    ValueTranslator<String, Double> STR_TO_DOUBLE = s -> s == null ? null : Double.valueOf(s);
     /** Value translator from {@code String} to {@code BigInteger}. */
-    ValueTranslator<String, BigInteger> STR_TO_BIG_INT = BigInteger::new;
+    ValueTranslator<String, BigInteger> STR_TO_BIG_INT = s -> s == null ? null : new BigInteger(s);
     /** Value translator from {@code String} to {@code BigDecimal}. */
-    ValueTranslator<String, BigDecimal> STR_TO_BIG_DEC = BigDecimal::new;
+    ValueTranslator<String, BigDecimal> STR_TO_BIG_DEC = s -> s == null ? null : new BigDecimal(s);
     /** Value translator from {@code Number} to {@code String}. */
-    ValueTranslator<Number, String> NUMBER_TO_STR = Number::toString;
+    ValueTranslator<Number, String> NUMBER_TO_STR = n -> n == null ? null : n.toString();
     /** Value translator from {@code String} to {@code Boolean}. */
     ValueTranslator<String, Boolean> STR_TO_BOOL = stringToBoolean("true");
     /** Value translator from {@code Boolean} to {@code String}. */
@@ -88,7 +88,7 @@ extends Function<S, T> {
     static ValueTranslator<String, Boolean> stringToBoolean(
             final @NotNull String trueValue) {
         Validate.notNull(trueValue);
-        return e -> e.equalsIgnoreCase(trueValue);
+        return e -> e == null ? null : trueValue.equalsIgnoreCase(e);
     }
 
     /**
@@ -104,7 +104,7 @@ extends Function<S, T> {
             final @NotNull String falseValue) {
         Validate.notNull(trueValue);
         Validate.notNull(falseValue);
-        return e -> Boolean.TRUE.equals(e) ? trueValue : falseValue;
+        return e -> e == null ? null : Boolean.TRUE.equals(e) ? trueValue : falseValue;
     }
 
     /**

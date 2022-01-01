@@ -104,11 +104,11 @@ public class ValueAssignment<V> {
      * compatible type
      */
     @SuppressWarnings("unchecked")
-    public static <T> ValueAssignment<T> fromUntyped(
-            final Path<T> target,
+    public static <T> ValueAssignment<T> ofUntyped(
+            final @NotNull Path<T> target,
             final Expression<?> value) {
-        if (target.getType().isAssignableFrom(value.getType())) {
-            return new ValueAssignment<T>(target, (Expression<? extends T>) value);
+        if (value == null || target.getType().isAssignableFrom(value.getType())) {
+            return of(target, (Expression<? extends T>) value);
         } else {
             throw new IllegalArgumentException(String.format(
                     "Replaced assigned expression for path %s is not of expected type: %s",

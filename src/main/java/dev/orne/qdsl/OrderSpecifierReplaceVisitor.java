@@ -59,6 +59,9 @@ extends OrderSpecifierVisitor<OrderSpecifier<?>[], C> {
         final Expression<? extends Comparable<?>> newTarget =
                 OrderSpecifierReplaceVisitor.asComparable(
                         from.getTarget().accept(visitor, null));
+        if (newTarget == null) {
+            return new OrderSpecifier<?>[0];
+        }
         if (!from.getTarget().equals(newTarget)) {
             result = OrderSpecifierReplaceVisitor.resultFrom(
                     from,
@@ -95,7 +98,7 @@ extends OrderSpecifierVisitor<OrderSpecifier<?>[], C> {
      * @param target The target expression
      * @return The created order specifier
      */
-    static <T extends Comparable<?>> @NotNull OrderSpecifier<?> resultFrom(
+    static <T extends Comparable<?>> @NotNull OrderSpecifier<T> resultFrom(
             final @NotNull OrderSpecifier<?> template,
             final @NotNull Expression<T> target) {
         return createResult(

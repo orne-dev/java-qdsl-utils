@@ -104,6 +104,38 @@ class ValueAssignmentTest {
     }
 
     @Test
+    void testOfUntypedNullExpression() {
+        final Expression<?> value = null;
+        final ValueAssignment<String> result =
+                ValueAssignment.ofUntyped(PROPERTY_A_PATH, value);
+        assertNotNull(result);
+        assertSame(PROPERTY_A_PATH, result.getPath());
+        assertNull(result.getValue());
+        assertNotNull(result.toString());
+    }
+
+    @Test
+    void testOfUntypedExpression() {
+        final Expression<String> value = Expressions.asString("some");
+        final Expression<?> uvalue = (Expression<?>) value;
+        final ValueAssignment<String> result =
+                ValueAssignment.ofUntyped(PROPERTY_A_PATH, uvalue);
+        assertNotNull(result);
+        assertSame(PROPERTY_A_PATH, result.getPath());
+        assertSame(value, result.getValue());
+        assertNotNull(result.toString());
+    }
+
+    @Test
+    void testOfUntypedInvalidExpression() {
+        final Expression<Integer> value = Expressions.asNumber(10);
+        final Expression<?> uvalue = (Expression<?>) value;
+        assertThrows(IllegalArgumentException.class, () -> {
+            ValueAssignment.ofUntyped(PROPERTY_A_PATH, uvalue);
+        });
+    }
+
+    @Test
     void testAccept() {
         final String value = "Test value";
         final ValueAssignment<String> assignment =

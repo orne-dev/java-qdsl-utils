@@ -186,7 +186,7 @@ extends Function<Expression<S>, ValueAssignments> {
                 Objects.equals(from.getValue(), newValue)) {
             result = from;
         } else if (newTarget instanceof Path) {
-            return ValueAssignment.fromUntyped((Path<?>) newTarget, newValue);
+            return ValueAssignment.ofUntyped((Path<?>) newTarget, newValue);
         } else {
             throw new IllegalArgumentException(String.format(
                     "Replacement expression for path %s is not a path: %s",
