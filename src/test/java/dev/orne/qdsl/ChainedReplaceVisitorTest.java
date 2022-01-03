@@ -27,6 +27,7 @@ import static org.mockito.BDDMockito.*;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -216,12 +217,12 @@ public class ChainedReplaceVisitorTest {
         willReturn(TestTypes.ComparableType.class).given(partialResultB).getType();
         willReturn(partialResultA).given(initialExpr).accept(VISITOR_A, null);
         willReturn(partialResultB).given(partialResultA).accept(VISITOR_B, null);
-        final OrderSpecifier<?>[] result = chained.visit(initial, null);
+        final List<OrderSpecifier<?>> result = chained.visit(initial, null);
         assertNotNull(result);
-        assertEquals(1, result.length);
-        assertSame(partialResultB, result[0].getTarget());
-        assertSame(initial.getOrder(), result[0].getOrder());
-        assertSame(initial.getNullHandling(), result[0].getNullHandling());
+        assertEquals(1, result.size());
+        assertSame(partialResultB, result.get(0).getTarget());
+        assertSame(initial.getOrder(), result.get(0).getOrder());
+        assertSame(initial.getNullHandling(), result.get(0).getNullHandling());
         then(initialExpr).should().accept(VISITOR_A, null);
         then(partialResultA).should().accept(VISITOR_B, null);
     }
@@ -248,22 +249,22 @@ public class ChainedReplaceVisitorTest {
                 TestTypes.randomOrderSpecifier();
         final OrderSpecifier<?> partialResultB22 =
                 TestTypes.randomOrderSpecifier();
-        willReturn(new OrderSpecifier<?>[] {
+        willReturn(Arrays.asList(
             partialResultA1, partialResultA2
-        }).given(visitorA).visit(initial, null);
-        willReturn(new OrderSpecifier<?>[] {
+        )).given(visitorA).visit(initial, null);
+        willReturn(Arrays.asList(
             partialResultB11, partialResultB12
-        }).given(visitorB).visit(partialResultA1, null);
-        willReturn(new OrderSpecifier<?>[] {
+        )).given(visitorB).visit(partialResultA1, null);
+        willReturn(Arrays.asList(
             partialResultB21, partialResultB22
-        }).given(visitorB).visit(partialResultA2, null);
-        final OrderSpecifier<?>[] result = chained.visit(initial, null);
+        )).given(visitorB).visit(partialResultA2, null);
+        final List<OrderSpecifier<?>> result = chained.visit(initial, null);
         assertNotNull(result);
-        assertEquals(4, result.length);
-        assertSame(partialResultB11, result[0]);
-        assertSame(partialResultB12, result[1]);
-        assertSame(partialResultB21, result[2]);
-        assertSame(partialResultB22, result[3]);
+        assertEquals(4, result.size());
+        assertSame(partialResultB11, result.get(0));
+        assertSame(partialResultB12, result.get(1));
+        assertSame(partialResultB21, result.get(2));
+        assertSame(partialResultB22, result.get(3));
         then(visitorA).should().visit(initial, null);
         then(visitorB).should().visit(partialResultA1, null);
         then(visitorB).should().visit(partialResultA2, null);
@@ -289,20 +290,20 @@ public class ChainedReplaceVisitorTest {
                 TestTypes.expressionOf(TestTypes.ComparableType.class);
         final Expression<TestTypes.ComparableType> partialExprB2 =
                 TestTypes.expressionOf(TestTypes.ComparableType.class);
-        willReturn(new OrderSpecifier<?>[] {
+        willReturn(Arrays.asList(
             partialResultA1, partialResultA2
-        }).given(visitorA).visit(initial, null);
+        )).given(visitorA).visit(initial, null);
         willReturn(partialExprB1).given(partialExprA1).accept(VISITOR_B, null);
         willReturn(partialExprB2).given(partialExprA2).accept(VISITOR_B, null);
-        final OrderSpecifier<?>[] result = chained.visit(initial, null);
+        final List<OrderSpecifier<?>> result = chained.visit(initial, null);
         assertNotNull(result);
-        assertEquals(2, result.length);
-        assertSame(partialExprB1, result[0].getTarget());
-        assertSame(partialResultA1.getOrder(), result[0].getOrder());
-        assertSame(partialResultA1.getNullHandling(), result[0].getNullHandling());
-        assertSame(partialExprB2, result[1].getTarget());
-        assertSame(partialResultA2.getOrder(), result[1].getOrder());
-        assertSame(partialResultA2.getNullHandling(), result[1].getNullHandling());
+        assertEquals(2, result.size());
+        assertSame(partialExprB1, result.get(0).getTarget());
+        assertSame(partialResultA1.getOrder(), result.get(0).getOrder());
+        assertSame(partialResultA1.getNullHandling(), result.get(0).getNullHandling());
+        assertSame(partialExprB2, result.get(1).getTarget());
+        assertSame(partialResultA2.getOrder(), result.get(1).getOrder());
+        assertSame(partialResultA2.getNullHandling(), result.get(1).getNullHandling());
         then(visitorA).should().visit(initial, null);
         then(partialResultA1.getTarget()).should().accept(VISITOR_B, null);
         then(partialResultA2.getTarget()).should().accept(VISITOR_B, null);

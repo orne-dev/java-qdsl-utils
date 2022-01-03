@@ -24,6 +24,8 @@ package dev.orne.qdsl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -183,13 +185,13 @@ extends ChainedReplaceVisitor {
      * @param orders The order specifiers to translate
      * @return The resulting order specifiers, translated if required
      */
-    public @NotNull OrderSpecifier<?>[] translateOrderSpecifiers(
+    public @NotNull List<OrderSpecifier<?>> translateOrderSpecifiers(
             final @NotNull OrderSpecifier<?>... orders) {
         return Arrays.asList(orders)
                 .parallelStream()
                 .map(this::translateOrderSpecifier)
-                .flatMap(r -> Arrays.asList(r).stream())
-                .toArray(OrderSpecifier<?>[]::new);
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -198,7 +200,7 @@ extends ChainedReplaceVisitor {
      * @param order The order specifier to translate
      * @return The resulting order specifier, translated if required
      */
-    public @NotNull OrderSpecifier<?>[] translateOrderSpecifier(
+    public @NotNull List<OrderSpecifier<?>> translateOrderSpecifier(
             final @NotNull OrderSpecifier<?> order) {
         return this.visit(order, null);
     }

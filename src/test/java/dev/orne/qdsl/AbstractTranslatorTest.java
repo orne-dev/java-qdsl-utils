@@ -24,6 +24,8 @@ package dev.orne.qdsl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.querydsl.core.types.Expression;
@@ -106,9 +108,9 @@ public abstract class AbstractTranslatorTest {
      * @param expr The expression to translate
      */
     protected void assertOrderingTranslation(
-            final OrderSpecifier<?>[] expected,
+            final List<OrderSpecifier<?>> expected,
             final @NotNull OrderSpecifier<?> expr) {
-        assertArrayEquals(expected, getTranslator().translateOrderSpecifier(expr));
+        assertEquals(expected, getTranslator().translateOrderSpecifier(expr));
     }
 
     /**
@@ -119,9 +121,9 @@ public abstract class AbstractTranslatorTest {
      * @param expr The expressions to translate
      */
     protected void assertOrderingTranslation(
-            final OrderSpecifier<?>[] expected,
+            final List<OrderSpecifier<?>> expected,
             final @NotNull OrderSpecifier<?>... exprs) {
-        assertArrayEquals(expected, getTranslator().translateOrderSpecifiers(exprs));
+        assertEquals(expected, getTranslator().translateOrderSpecifiers(exprs));
     }
 
     /**

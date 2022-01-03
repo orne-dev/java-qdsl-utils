@@ -2,6 +2,8 @@ package dev.orne.qdsl;
 
 import static org.mockito.BDDMockito.*;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -29,7 +31,7 @@ public class TestTypes {
          * To help Mockito resolve generic types.
          */
         @Override
-        OrderSpecifier<?>[] visit(
+        List<OrderSpecifier<?>> visit(
                 @NotNull OrderSpecifier<?> expr,
                 Void context);
     }

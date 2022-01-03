@@ -1,5 +1,8 @@
 package dev.orne.qdsl;
 
+import java.util.Collections;
+import java.util.List;
+
 /*-
  * #%L
  * Orne Querydsl Utils
@@ -42,7 +45,7 @@ import com.querydsl.core.types.Visitor;
  * @since 0.1
  */
 public interface OrderSpecifierReplaceVisitor<C>
-extends OrderSpecifierVisitor<OrderSpecifier<?>[], C> {
+extends OrderSpecifierVisitor<List<OrderSpecifier<?>>, C> {
 
     /**
      * Tries to translate the order specifier translating its target expression
@@ -52,7 +55,7 @@ extends OrderSpecifierVisitor<OrderSpecifier<?>[], C> {
      * @param visitor The replace visitor to use
      * @return The resulting order specifier
      */
-    static OrderSpecifier<?>[] fromComponents(
+    static List<OrderSpecifier<?>> fromComponents(
             final OrderSpecifier<?> from,
             final Visitor<Expression<?>, ?> visitor) {
         OrderSpecifier<?> result = from;
@@ -60,14 +63,14 @@ extends OrderSpecifierVisitor<OrderSpecifier<?>[], C> {
                 OrderSpecifierReplaceVisitor.asComparable(
                         from.getTarget().accept(visitor, null));
         if (newTarget == null) {
-            return new OrderSpecifier<?>[0];
+            return Collections.emptyList();
         }
         if (!from.getTarget().equals(newTarget)) {
             result = OrderSpecifierReplaceVisitor.resultFrom(
                     from,
                     newTarget);
         }
-        return new OrderSpecifier<?>[] { result };
+        return Collections.singletonList(result);
     }
 
     /**

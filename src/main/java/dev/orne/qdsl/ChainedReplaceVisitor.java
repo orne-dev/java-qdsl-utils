@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -55,8 +56,8 @@ import com.querydsl.core.types.Visitor;
  */
 public class ChainedReplaceVisitor
 implements Visitor<Expression<?>, Void>,
-        OrderSpecifierVisitor<OrderSpecifier<?>[], Void>,
-        ValueAssignmentVisitor<ValueAssignments, Void> {
+        OrderSpecifierReplaceVisitor<Void>,
+        ValueAssignmentReplaceVisitor<Void> {
 
     /** The delegated visitors. */
     private final List<Visitor<Expression<?>, ?>> visitors;
@@ -195,25 +196,23 @@ implements Visitor<Expression<?>, Void>,
      * {@inheritDoc}
      */
     @Override
-    public OrderSpecifier<?>[] visit(
+    public List<OrderSpecifier<?>> visit(
             final @NotNull OrderSpecifier<?> order,
             final Void context) {
-        OrderSpecifier<?>[] result = new OrderSpecifier<?>[] { order };
+        List<OrderSpecifier<?>> result = Collections.singletonList(order);
         for (final Visitor<Expression<?>, ?> visitor : this.visitors) {
             if (visitor instanceof OrderSpecifierReplaceVisitor) {
                 final OrderSpecifierReplaceVisitor<?> ovisitor =
                         (OrderSpecifierReplaceVisitor<?>) visitor;
-                result = Arrays.asList(result)
-                        .parallelStream()
+                result = result.parallelStream()
                         .map(e -> ovisitor.visit(e, null))
-                        .flatMap(r -> Arrays.asList(r).stream())
-                        .toArray(OrderSpecifier<?>[]::new);
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
             } else {
-                result = Arrays.asList(result)
-                        .parallelStream()
+                result = result.parallelStream()
                         .map(p -> OrderSpecifierReplaceVisitor.fromComponents(p, visitor))
-                        .flatMap(r -> Arrays.asList(r).stream())
-                        .toArray(OrderSpecifier<?>[]::new);
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
             }
         }
         return result;

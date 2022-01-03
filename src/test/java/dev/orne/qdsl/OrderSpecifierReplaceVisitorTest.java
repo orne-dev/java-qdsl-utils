@@ -25,6 +25,8 @@ package dev.orne.qdsl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -54,11 +56,11 @@ public class OrderSpecifierReplaceVisitorTest {
         @SuppressWarnings("unchecked")
         final Visitor<Expression<?>, ?> visitor = mock(Visitor.class);
         willReturn(expr).given(expr).accept(visitor, null);
-        final OrderSpecifier<?>[] result = OrderSpecifierReplaceVisitor
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
                 .fromComponents(value, visitor );
         assertNotNull(result);
-        assertEquals(1, result.length);
-        assertSame(value, result[0]);
+        assertEquals(1, result.size());
+        assertSame(value, result.get(0));
     }
 
     @Test
@@ -72,13 +74,13 @@ public class OrderSpecifierReplaceVisitorTest {
         final Expression<TestTypes.ComparableType> replacedExpr =
                 TestTypes.expressionOf(TestTypes.ComparableType.class);
         willReturn(replacedExpr).given(expr).accept(visitor, null);
-        final OrderSpecifier<?>[] result = OrderSpecifierReplaceVisitor
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
                 .fromComponents(value, visitor );
         assertNotNull(result);
-        assertEquals(1, result.length);
-        assertSame(replacedExpr, result[0].getTarget());
-        assertSame(value.getOrder(), result[0].getOrder());
-        assertSame(value.getNullHandling(), result[0].getNullHandling());
+        assertEquals(1, result.size());
+        assertSame(replacedExpr, result.get(0).getTarget());
+        assertSame(value.getOrder(), result.get(0).getOrder());
+        assertSame(value.getNullHandling(), result.get(0).getNullHandling());
     }
 
     @Test
@@ -92,10 +94,10 @@ public class OrderSpecifierReplaceVisitorTest {
         final Expression<?> replacedExpr = mock(Expression.class);
         willReturn(Object.class).given(replacedExpr).getType();
         willReturn(replacedExpr).given(expr).accept(visitor, null);
-        final OrderSpecifier<?>[] result = OrderSpecifierReplaceVisitor
+        final List<OrderSpecifier<?>>result = OrderSpecifierReplaceVisitor
                 .fromComponents(value, visitor );
         assertNotNull(result);
-        assertEquals(0, result.length);
+        assertEquals(0, result.size());
     }
 
     @Test
