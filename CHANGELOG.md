@@ -13,6 +13,7 @@
     01. Added `dev.orne.qdsl.OrderSpecifierReplaceVisitor` interface.
     01. Added `dev.orne.qdsl.ValueAssignmentVisitor` interface.
     01. Added `dev.orne.qdsl.ValueAssignmentReplaceVisitor` interface.
+    01. Added `dev.orne.qdsl.TranslateVisitor` class.
     01. Added `dev.orne.qdsl.SimplePathTranslator` class.
     01. Added `dev.orne.qdsl.ChainedReplaceVisitor` class.
     01. Added `dev.orne.qdsl.Translator` class.

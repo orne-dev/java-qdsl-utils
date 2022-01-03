@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
 
-import com.querydsl.core.support.ReplaceVisitor;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 
@@ -39,8 +38,7 @@ import com.querydsl.core.types.Path;
  * @since 0.1
  */
 public class SimplePathTranslator<S>
-extends ReplaceVisitor<Void>
-implements ValueAssignmentReplaceVisitor<Void> {
+extends TranslateVisitor<Void> {
 
     /** The source path. */
     private final @NotNull Path<S> source;

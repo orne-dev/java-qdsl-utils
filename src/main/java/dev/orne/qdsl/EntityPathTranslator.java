@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
 
-import com.querydsl.core.support.ReplaceVisitor;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpression;
@@ -44,8 +43,7 @@ import com.querydsl.core.types.ProjectionRole;
  * @since 0.1
  */
 public class EntityPathTranslator<S, I>
-extends ReplaceVisitor<Void>
-implements ValueAssignmentReplaceVisitor<Void> {
+extends TranslateVisitor<Void> {
 
     /** The source path. */
     private final @NotNull EntityPath<S> source;
