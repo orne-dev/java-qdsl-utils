@@ -1208,6 +1208,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 final Set<QueryFlag> newFlags = willTranslateQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1237,7 +1238,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1260,6 +1261,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 final List<Expression<?>> newGroupBy = willTranslateGroupByExpressions(metadata, visitor);
@@ -1289,7 +1291,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1312,6 +1314,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1341,7 +1344,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1364,6 +1367,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1393,7 +1397,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1416,6 +1420,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1445,7 +1450,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1468,6 +1473,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1497,7 +1503,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1520,6 +1526,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1529,6 +1536,7 @@ class TranslateVisitorTest {
                 willPreserveParams(metadata, visitor);
                 final Expression<?> newProjection = willTranslateProjection(metadata, visitor);
                 willPreserveWhere(metadata, visitor);
+                willReturn(MyOtherType.class).given(newProjection).getType();
                 final Expression<?> result = visitor.visit(value, null);
                 assertNotNull(result);
                 assertNotSame(value, result);
@@ -1545,11 +1553,11 @@ class TranslateVisitorTest {
                 assertEquals(value.getMetadata().getParams(), resultSQ.getMetadata().getParams());
                 assertEquals(newProjection, resultSQ.getMetadata().getProjection());
                 assertEquals(value.getMetadata().getWhere(), resultSQ.getMetadata().getWhere());
-                assertEquals(MyType.class, resultSQ.getType());
+                assertEquals(MyOtherType.class, resultSQ.getType());
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(newProjection).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1572,6 +1580,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 willPreserveQueryFlags(metadata, visitor);
                 willPreserveGroupByExpressions(metadata, visitor);
@@ -1601,7 +1610,7 @@ class TranslateVisitorTest {
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(metadata.getProjection()).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }
@@ -1624,6 +1633,7 @@ class TranslateVisitorTest {
                 final SubQueryExpression<?> value = mock(SubQueryExpression.class);
                 final QueryMetadata metadata = generateMetadata();
                 willReturn(metadata).given(value).getMetadata();
+                willReturn(MyType.class).given(metadata.getProjection()).getType();
                 willReturn(MyType.class).given(value).getType();
                 final Set<QueryFlag> newFlags = willTranslateQueryFlags(metadata, visitor);
                 final List<Expression<?>> newGroupBy = willTranslateGroupByExpressions(metadata, visitor);
@@ -1633,6 +1643,7 @@ class TranslateVisitorTest {
                 final Map<ParamExpression<?>, Object> newParams = willTranslateParams(metadata, visitor);
                 final Expression<?> newProjection = willTranslateProjection(metadata, visitor);
                 final Predicate newWhere = willTranslateWhere(metadata, visitor);
+                willReturn(MyOtherType.class).given(newProjection).getType();
                 final Expression<?> result = visitor.visit(value, null);
                 assertNotNull(result);
                 assertNotSame(value, result);
@@ -1649,11 +1660,11 @@ class TranslateVisitorTest {
                 assertEquals(newParams, resultSQ.getMetadata().getParams());
                 assertEquals(newProjection, resultSQ.getMetadata().getProjection());
                 assertEquals(newWhere, resultSQ.getMetadata().getWhere());
-                assertEquals(MyType.class, resultSQ.getType());
+                assertEquals(MyOtherType.class, resultSQ.getType());
                 then(visitor).should().visit(value, null);
                 thenShouldVisitAllComponents(metadata, visitor);
                 then(value).should(atLeastOnce()).getMetadata();
-                then(value).should(atLeastOnce()).getType();
+                then(newProjection).should(atLeastOnce()).getType();
                 then(value).shouldHaveNoMoreInteractions();
             }
         }

@@ -35,6 +35,7 @@ import com.querydsl.core.types.Path;
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2021-10
+ * @param <S> The source path type
  * @since 0.1
  */
 public class SimplePathTranslator<S>
@@ -79,6 +80,18 @@ extends TranslateVisitor<Void> {
     }
 
     /**
+     * Starts the construction of a new instance.
+     * 
+     * @param <V> The source path type
+     * @param source The source path
+     * @return The next step builder
+     */
+    public static <V> TargetBuilder<V> fromPath(
+            final @NotNull Path<V> source) {
+        return new Builder<>(source);
+    }
+
+    /**
      * Returns the source path.
      * 
      * @return The source path
@@ -102,7 +115,7 @@ extends TranslateVisitor<Void> {
      * @return The value assignment translator
      */
     public @NotNull ValueAssignmentTranslator<S> getAssignmentTranslator() {
-        return assignmentTranslator;
+        return this.assignmentTranslator;
     }
 
     /**
@@ -133,18 +146,6 @@ extends TranslateVisitor<Void> {
         } else {
             return ValueAssignments.of(vexpr);
         }
-    }
-
-    /**
-     * Starts the construction of a new instance.
-     * 
-     * @param <V> The source path type
-     * @param source The source path
-     * @return The next step builder
-     */
-    public static <V> TargetBuilder<V> fromPath(
-            final @NotNull Path<V> source) {
-        return new Builder<>(source);
     }
 
     /**

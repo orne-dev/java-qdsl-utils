@@ -78,7 +78,7 @@ implements OrderSpecifierReplaceVisitor<C>,
         if (exprMD.equals(md)) {
             return expr;
         } else {
-            return new SubQueryExpressionImpl(expr.getType(), md);
+            return new SubQueryExpressionImpl(md.getProjection().getType(), md);
         }
     }
 
