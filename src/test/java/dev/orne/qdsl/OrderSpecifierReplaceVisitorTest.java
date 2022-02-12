@@ -30,10 +30,12 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.dsl.Expressions;
 
 
 /**
@@ -154,6 +156,114 @@ public class OrderSpecifierReplaceVisitorTest {
         assertSame(expr, result.getTarget());
         assertSame(order, result.getOrder());
         assertSame(template.getNullHandling(), result.getNullHandling());
+    }
+
+    @Test
+    void testResultFrom_Tuple() {
+        final Object[] tupleComponents = new Object[] {
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                mock(TestTypes.ComparableType.class)
+        };
+        final Tuple tuple = mock(Tuple.class);
+        when(tuple.size()).thenReturn(tupleComponents.length);
+        when(tuple.toArray()).thenReturn(tupleComponents);
+        final OrderSpecifier<?> template =
+                TestTypes.randomOrderSpecifier();
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
+                .resultFrom(template, tuple);
+        assertNotNull(result);
+        assertEquals(tupleComponents.length, result.size());
+        assertSame(tupleComponents[0], result.get(0).getTarget());
+        assertSame(template.getOrder(), result.get(0).getOrder());
+        assertSame(template.getNullHandling(), result.get(0).getNullHandling());
+        assertSame(tupleComponents[1], result.get(1).getTarget());
+        assertSame(template.getOrder(), result.get(1).getOrder());
+        assertSame(template.getNullHandling(), result.get(1).getNullHandling());
+        assertEquals(Expressions.constant(tupleComponents[2]), result.get(2).getTarget());
+        assertSame(template.getOrder(), result.get(2).getOrder());
+        assertSame(template.getNullHandling(), result.get(2).getNullHandling());
+    }
+
+    @Test
+    void testResultFrom_Tuple_InvalidComponents() {
+        final Object[] tupleComponents = new Object[] {
+                TestTypes.expressionOf(TestTypes.SimpleType.class),
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                mock(TestTypes.SimpleType.class),
+                mock(TestTypes.ComparableType.class)
+        };
+        final Tuple tuple = mock(Tuple.class);
+        when(tuple.size()).thenReturn(tupleComponents.length);
+        when(tuple.toArray()).thenReturn(tupleComponents);
+        final OrderSpecifier<?> template =
+                TestTypes.randomOrderSpecifier();
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
+                .resultFrom(template, tuple);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertSame(tupleComponents[1], result.get(0).getTarget());
+        assertSame(template.getOrder(), result.get(0).getOrder());
+        assertSame(template.getNullHandling(), result.get(0).getNullHandling());
+        assertEquals(Expressions.constant(tupleComponents[3]), result.get(1).getTarget());
+        assertSame(template.getOrder(), result.get(1).getOrder());
+        assertSame(template.getNullHandling(), result.get(1).getNullHandling());
+    }
+
+    @Test
+    void testResultFrom_Tuple_Order() {
+        final Object[] tupleComponents = new Object[] {
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                mock(TestTypes.ComparableType.class)
+        };
+        final Tuple target = mock(Tuple.class);
+        when(target.size()).thenReturn(tupleComponents.length);
+        when(target.toArray()).thenReturn(tupleComponents);
+        final Order order =
+                TestTypes.randomEnum(Order.class);
+        final OrderSpecifier<?> template =
+                TestTypes.randomOrderSpecifier();
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
+                .resultFrom(template, target, order);
+        assertNotNull(result);
+        assertEquals(tupleComponents.length, result.size());
+        assertSame(tupleComponents[0], result.get(0).getTarget());
+        assertSame(order, result.get(0).getOrder());
+        assertSame(template.getNullHandling(), result.get(0).getNullHandling());
+        assertSame(tupleComponents[1], result.get(1).getTarget());
+        assertSame(order, result.get(1).getOrder());
+        assertSame(template.getNullHandling(), result.get(1).getNullHandling());
+        assertEquals(Expressions.constant(tupleComponents[2]), result.get(2).getTarget());
+        assertSame(order, result.get(2).getOrder());
+        assertSame(template.getNullHandling(), result.get(2).getNullHandling());
+    }
+
+    @Test
+    void testResultFrom_Tuple_Order_InvalidComponents() {
+        final Object[] tupleComponents = new Object[] {
+                TestTypes.expressionOf(TestTypes.SimpleType.class),
+                TestTypes.expressionOf(TestTypes.ComparableType.class),
+                mock(TestTypes.SimpleType.class),
+                mock(TestTypes.ComparableType.class)
+        };
+        final Tuple target = mock(Tuple.class);
+        when(target.size()).thenReturn(tupleComponents.length);
+        when(target.toArray()).thenReturn(tupleComponents);
+        final Order order =
+                TestTypes.randomEnum(Order.class);
+        final OrderSpecifier<?> template =
+                TestTypes.randomOrderSpecifier();
+        final List<OrderSpecifier<?>> result = OrderSpecifierReplaceVisitor
+                .resultFrom(template, target, order);
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertSame(tupleComponents[1], result.get(0).getTarget());
+        assertSame(order, result.get(0).getOrder());
+        assertSame(template.getNullHandling(), result.get(0).getNullHandling());
+        assertEquals(Expressions.constant(tupleComponents[3]), result.get(1).getTarget());
+        assertSame(order, result.get(1).getOrder());
+        assertSame(template.getNullHandling(), result.get(1).getNullHandling());
     }
 
     @Test

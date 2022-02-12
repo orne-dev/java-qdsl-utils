@@ -1,5 +1,6 @@
 package dev.orne.qdsl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,11 +29,14 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.dsl.Expressions;
 
 /**
  * {@code OrderSpecifierReplaceVisitor} defines a visitor signature for
@@ -93,6 +97,23 @@ extends OrderSpecifierVisitor<List<OrderSpecifier<?>>, C> {
     }
 
     /**
+     * Casts the untyped expression to an expression of a comparable type.
+     * If the source expression is not of a comparable type {@code null} is
+     * returned.
+     * 
+     * @param expr The source expression
+     * @return The expression of comparable type, or {@code null} if the source
+     * expression is not of a comparable type
+     */
+    @SuppressWarnings("unchecked")
+    static @NotNull Expression<? extends Comparable<?>> asNonNullComparable(
+            final @NotNull Expression<?> expr) {
+        Validate.notNull(expr);
+        Validate.isAssignableFrom(Comparable.class, expr.getType());
+        return (Expression<? extends Comparable<?>>) expr;
+    }
+
+    /**
      * Creates a new typed order specifier with the specified target based on
      * the specified base instance.
      * 
@@ -128,6 +149,54 @@ extends OrderSpecifierVisitor<List<OrderSpecifier<?>>, C> {
                 target,
                 order,
                 template.getNullHandling());
+    }
+
+    /**
+     * Creates a list of order specifier for the comparable elements of the
+     * specified tuple.
+     * 
+     * @param template The base order specifier
+     * @param target The target tuple
+     * @return The created order specifier list
+     */
+    static @NotNull List<OrderSpecifier<?>> resultFrom(
+            final @NotNull OrderSpecifier<?> template,
+            final @NotNull Tuple target) {
+        final List<OrderSpecifier<?>> result = new ArrayList<>(target.size());
+        for (final Object elem : target.toArray()) {
+            if (elem instanceof Expression &&
+                    Comparable.class.isAssignableFrom(((Expression<?>) elem).getType())) {
+                result.add(resultFrom(template, asNonNullComparable((Expression<?>) elem)));
+            } else if (elem instanceof Comparable) {
+                result.add(resultFrom(template, asNonNullComparable(Expressions.constant(elem))));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Creates a list of order specifiers for the comparable elements of the
+     * specified tuple with the specified order.
+     * 
+     * @param template The base order specifier
+     * @param target The target tuple
+     * @param order The ordering direction
+     * @return The created order specifier list
+     */
+    static @NotNull List<OrderSpecifier<?>> resultFrom(
+            final @NotNull OrderSpecifier<?> template,
+            final @NotNull Tuple target,
+            final @NotNull Order order) {
+        final List<OrderSpecifier<?>> result = new ArrayList<>(target.size());
+        for (final Object elem : target.toArray()) {
+            if (elem instanceof Expression &&
+                    Comparable.class.isAssignableFrom(((Expression<?>) elem).getType())) {
+                result.add(resultFrom(template, asNonNullComparable((Expression<?>) elem), order));
+            } else if (elem instanceof Comparable) {
+                result.add(resultFrom(template, asNonNullComparable(Expressions.constant(elem)), order));
+            }
+        }
+        return result;
     }
 
     /**
