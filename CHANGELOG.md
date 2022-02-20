@@ -3,6 +3,8 @@
 01. :wrench: Added `org.apache.commons:commons-lang3:3.12.0` dependency.
 01. :wrench: Added `com.querydsl:querydsl-core:5.0.0` dependency.
 01. :wrench: Added `commons-beanutils:commons-beanutils:1.9.4` optional dependency.
+01. :gift: Added Querydsl utility classes.
+    01. Added `dev.orne.qdsl.QBeanBuilder` class.
 01. :gift: Added Querydsl expression translation system.
     01. Added `dev.orne.qdsl.ValueTranslator` interface.
     01. Added `dev.orne.qdsl.ExpressionTranslator` interface.
