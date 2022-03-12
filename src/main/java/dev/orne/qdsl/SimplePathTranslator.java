@@ -25,6 +25,8 @@ package dev.orne.qdsl;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
@@ -146,6 +148,17 @@ extends TranslateVisitor<Void> {
         } else {
             return ValueAssignments.of(vexpr);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("source", this.source)
+                .append("target", this.target)
+                .build();
     }
 
     /**
