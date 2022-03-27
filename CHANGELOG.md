@@ -18,4 +18,7 @@
     01. Added `dev.orne.qdsl.TranslateVisitor` class.
     01. Added `dev.orne.qdsl.SimplePathTranslator` class.
     01. Added `dev.orne.qdsl.ChainedReplaceVisitor` class.
-    01. Added `dev.orne.qdsl.Translator` class.
+    01. Added `dev.orne.qdsl.QueryTranslationException` exception.
+    01. Added `dev.orne.qdsl.Translator` interface.
+    01. Added `dev.orne.qdsl.NopTranslator` class.
+    01. Added `dev.orne.qdsl.ChainedTranslator` class.

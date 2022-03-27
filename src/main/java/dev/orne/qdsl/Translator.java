@@ -4,7 +4,7 @@ package dev.orne.qdsl;
  * #%L
  * Orne Querydsl Utils
  * %%
- * Copyright (C) 2021 Orne Developments
+ * Copyright (C) 2022 Orne Developments
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,14 +22,9 @@ package dev.orne.qdsl;
  * #L%
  */
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang3.Validate;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -42,32 +37,13 @@ import com.querydsl.core.types.Visitor;
  * QueryDSL expression translator.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2021-12
+ * @version 1.0, 2022-03
  * @since 0.1
  */
-public class Translator
-extends ChainedReplaceVisitor {
+public interface Translator {
 
-    /**
-     * Creates a new instance.
-     * 
-     * @param visitors The delegated translators
-     */
-    @SafeVarargs
-    public Translator(
-            final Visitor<Expression<?>, ?>... visitors) {
-        super(visitors);
-    }
-
-    /**
-     * Creates a new instance.
-     * 
-     * @param visitors The delegated translators
-     */
-    public Translator(
-            final Collection<Visitor<Expression<?>, ?>> visitors) {
-        super(visitors);
-    }
+    /** Shared instance of no operation translator. */
+    public static final Translator NOP = new NopTranslator();
 
     /**
      * Creates a new instance.
@@ -76,9 +52,9 @@ extends ChainedReplaceVisitor {
      * @return The created instance
      */
     @SafeVarargs
-    public static Translator with(
+    public static ChainedTranslator with(
             final Visitor<Expression<?>, ?>... visitors) {
-        return new Translator(visitors);
+        return new ChainedTranslator(visitors);
     }
 
     /**
@@ -92,19 +68,6 @@ extends ChainedReplaceVisitor {
     public static <S> SimplePathTranslator.TargetBuilder<S> fromPath(
             final @NotNull Path<S> path) {
         return SimplePathTranslator.fromPath(path);
-    }
-
-    /**
-     * Starts the creation of a expression translator for the specified source
-     * entity path.
-     * 
-     * @param <S> The source entity path type
-     * @param path The source entity path
-     * @return A builder, to chain configuration calls
-     */
-    public static <S> EntityPathTranslator.TargetBuilder<S> fromEntity(
-            final @NotNull EntityPath<S> path) {
-        return EntityPathTranslator.fromPath(path);
     }
 
     /**
@@ -129,14 +92,10 @@ extends ChainedReplaceVisitor {
      * 
      * @param exprs The expressions to translate
      * @return The resulting expressions, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull Expression<?>[] translateProjections(
-            final @NotNull Expression<?>... exprs) {
-        return Arrays.asList(exprs)
-                .parallelStream()
-                .map(this::translateProjection)
-                .toArray(Expression<?>[]::new);
-    }
+    @NotNull Expression<?>[] translateProjections(
+            @NotNull Expression<?>... exprs);
 
     /**
      * Translates the specified query projection expression if required.
@@ -144,102 +103,78 @@ extends ChainedReplaceVisitor {
      * @param <U> The type of the expression
      * @param expr The expression to translate
      * @return The resulting expression, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    @SuppressWarnings("unchecked")
-    public @NotNull <U> Expression<U> translateProjection(
-            final Expression<U> expr) {
-        final Expression<?> result = expr.accept(this, null);
-        Validate.notNull(result);
-        Validate.isTrue(expr.getType().isAssignableFrom(result.getType()));
-        return (Expression<U>) result;
-    }
+    @NotNull <U> Expression<U> translateProjection(
+            @NotNull Expression<U> expr);
 
     /**
      * Translates the specified predicate expressions if required.
      * 
      * @param exprs The expressions to translate
      * @return The resulting expressions, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull Predicate[] translatePredicates(
-            final @NotNull Predicate... exprs) {
-        return Arrays.asList(exprs)
-                .parallelStream()
-                .map(this::translatePredicate)
-                .toArray(Predicate[]::new);
-    }
+    @NotNull Predicate[] translatePredicates(
+            @NotNull Predicate... exprs);
 
     /**
      * Translates the specified predicate expression if required.
      * 
      * @param expr The expression to translate
      * @return The resulting expression, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull Predicate translatePredicate(
-            final @NotNull Predicate expr) {
-        return (Predicate) expr.accept(this, null);
-    }
+    @NotNull Predicate translatePredicate(
+            @NotNull Predicate expr);
 
     /**
      * Translates the specified order specifiers if required.
      * 
      * @param orders The order specifiers to translate
      * @return The resulting order specifiers, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull List<OrderSpecifier<?>> translateOrderSpecifiers(
-            final @NotNull OrderSpecifier<?>... orders) {
-        return Arrays.asList(orders)
-                .parallelStream()
-                .map(this::translateOrderSpecifier)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
+    @NotNull OrderSpecifier<?>[] translateOrderSpecifiers(
+            @NotNull OrderSpecifier<?>... orders);
 
     /**
      * Translates the specified order specifier if required.
      * 
      * @param order The order specifier to translate
      * @return The resulting order specifier, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull List<OrderSpecifier<?>> translateOrderSpecifier(
-            final @NotNull OrderSpecifier<?> order) {
-        return this.visit(order, null);
-    }
+    @NotNull List<OrderSpecifier<?>> translateOrderSpecifier(
+            @NotNull OrderSpecifier<?> order);
 
     /**
      * Translates the specified value assignments if required.
      * 
      * @param assigments The value assignments to translate
      * @return The resulting value assignments, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull ValueAssignments translateAssigments(
-            final @NotNull ValueAssignment<?>... assigments) {
-        return translateAssigments(ValueAssignments.of(assigments));
-    }
+    @NotNull ValueAssignments translateAssigments(
+            @NotNull ValueAssignment<?>... assigments);
 
     /**
      * Translates the specified value assignments if required.
      * 
      * @param assigments The value assignments to translate
      * @return The resulting value assignments, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull ValueAssignments translateAssigments(
-            final @NotNull ValueAssignments assigments) {
-        return assigments.parallelStream()
-                .map(this::translateAssigment)
-                .collect(
-                    ValueAssignments::new,
-                    ValueAssignments::addAll,
-                    ValueAssignments::addAll);
-    }
+    @NotNull ValueAssignments translateAssigments(
+            @NotNull ValueAssignments assigments);
 
     /**
      * Translates the specified value assignment if required.
      * 
      * @param assigment The value assignment to translate
      * @return The resulting value assignments, translated if required
+     * @throws QueryTranslationException If an exception occurs
      */
-    public @NotNull ValueAssignments translateAssigment(
-            final @NotNull ValueAssignment<?> assigment) {
-        return assigment.accept(this, null);
-    }
+    @NotNull ValueAssignments translateAssigment(
+            @NotNull ValueAssignment<?> assigment);
 }

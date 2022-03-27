@@ -25,9 +25,6 @@ package dev.orne.qdsl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +33,6 @@ import com.querydsl.core.types.Visitor;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
-
 
 /**
  * Unit tests for {@code Translator}.
@@ -75,43 +71,16 @@ class TranslatorTest {
     @SuppressWarnings("unchecked")
     private static final Visitor<Expression<?>, ?> VISITOR_B =
             mock(Visitor.class);
-
     @Test
-    void testEmptyVarargsConstructor() {
-        final Translator result = new Translator();
-        assertNotNull(result.getVisitors());
-        assertEquals(0, result.getVisitors().size());
-    }
-
-    @Test
-    void testVarargsConstructor() {
-        assertThrows(IllegalArgumentException.class, ()-> {
-            new Translator(VISITOR_A, null);
-        });
-        final Translator result = new Translator(
-                VISITOR_A, VISITOR_B);
-        assertNotNull(result.getVisitors());
-        assertEquals(2, result.getVisitors().size());
-        assertSame(VISITOR_A, result.getVisitors().get(0));
-        assertSame(VISITOR_B, result.getVisitors().get(1));
-    }
-
-    @Test
-    void testCollectionConstructor() {
-        assertThrows(NullPointerException.class, ()-> {
-            new Translator((Collection<Visitor<Expression<?>, ?>>) null);
-        });
-        final Translator result = new Translator(
-                Arrays.asList(VISITOR_A, VISITOR_B));
-        assertNotNull(result.getVisitors());
-        assertEquals(2, result.getVisitors().size());
-        assertSame(VISITOR_A, result.getVisitors().get(0));
-        assertSame(VISITOR_B, result.getVisitors().get(1));
+    void testNop() {
+        final Translator result = Translator.NOP;
+        assertNotNull(result);
+        assertInstanceOf(NopTranslator.class, result);
     }
 
     @Test
     void testWith_Empty() {
-        final Translator result = Translator.with();
+        final ChainedTranslator result = Translator.with();
         assertNotNull(result.getVisitors());
         assertEquals(0, result.getVisitors().size());
     }
@@ -121,7 +90,7 @@ class TranslatorTest {
         assertThrows(IllegalArgumentException.class, ()-> {
             Translator.with(VISITOR_A, null);
         });
-        final Translator result = Translator.with(
+        final ChainedTranslator result = Translator.with(
                 VISITOR_A, VISITOR_B);
         assertNotNull(result.getVisitors());
         assertEquals(2, result.getVisitors().size());

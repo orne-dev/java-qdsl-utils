@@ -144,7 +144,7 @@ public class ValueAssignment<V> {
      * @param context The context of visit
      * @return The result of the visit
      */
-    public @NotNull <R, C> R accept(
+    public <R, C> R accept(
             final @NotNull ValueAssignmentVisitor<R, C> visitor,
             final C context) {
         return visitor.visit(this, context);
