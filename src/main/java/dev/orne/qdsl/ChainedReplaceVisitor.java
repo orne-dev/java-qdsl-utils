@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
@@ -246,5 +248,15 @@ implements Visitor<Expression<?>, Void>,
             }
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("visitors", this.visitors)
+                .build();
     }
 }

@@ -87,6 +87,7 @@ class SimplePathTranslatorTest {
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(EXPR, result.getTarget());
         assertSame(ASSIGN_TR, result.getAssignmentTranslator());
+        assertNotNull(result.toString());
     }
 
     @Test

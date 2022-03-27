@@ -53,7 +53,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
  * @see ChainedReplaceVisitor
  */
 @Tag("ut")
-public class ChainedReplaceVisitorTest {
+class ChainedReplaceVisitorTest {
 
     private static final PathBuilder<Object> BUILDER =
             new PathBuilder<Object>(Object.class, "builder");
@@ -70,6 +70,7 @@ public class ChainedReplaceVisitorTest {
         final ChainedReplaceVisitor result = new ChainedReplaceVisitor();
         assertNotNull(result.getVisitors());
         assertEquals(0, result.getVisitors().size());
+        assertNotNull(result.toString());
     }
 
     @Test
@@ -83,6 +84,7 @@ public class ChainedReplaceVisitorTest {
         assertEquals(2, result.getVisitors().size());
         assertSame(VISITOR_A, result.getVisitors().get(0));
         assertSame(VISITOR_B, result.getVisitors().get(1));
+        assertNotNull(result.toString());
     }
 
     @Test
@@ -96,6 +98,7 @@ public class ChainedReplaceVisitorTest {
         assertEquals(2, result.getVisitors().size());
         assertSame(VISITOR_A, result.getVisitors().get(0));
         assertSame(VISITOR_B, result.getVisitors().get(1));
+        assertNotNull(result.toString());
     }
 
     @Test
