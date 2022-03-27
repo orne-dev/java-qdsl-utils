@@ -1,0 +1,30 @@
+{
+	"folders": {},
+	"connections": {
+		"sqlite_jdbc-17eedbb7260-4728cb3a891912a7": {
+			"provider": "sqlite",
+			"driver": "sqlite_jdbc",
+			"name": "test.db",
+			"save-password": true,
+			"read-only": false,
+			"configuration": {
+				"database": "${project.path}/src/test/resources/test.db",
+				"url": "jdbc:sqlite:${project.path}/src/test/resources/test.db",
+				"type": "dev",
+				"auth-model": "native",
+				"handlers": {}
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"auto-close-transactions": false
+		}
+	}
+}
