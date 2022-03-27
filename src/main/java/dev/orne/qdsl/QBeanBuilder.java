@@ -49,6 +49,24 @@ implements Builder<QBean<T>> {
     }
 
     /**
+     * Utility factory method for clearer syntax.
+     * <p>
+     * Allows writing
+     * <code>QBeanBuilder.of(Type.class).build()</code>
+     * instead of
+     * <code>new QBeanBuilder{@literal <}Type{@literal >}(Type.class).build()</code>
+     * .
+     * 
+     * @param <T> The bean type
+     * @param type The bean type
+     * @return The created instance
+     */
+    public static <T> QBeanBuilder<T> of(
+            final @NotNull Class<T> type) {
+        return new QBeanBuilder<>(type);
+    }
+
+    /**
      * Returns {@code true} for field access and {@code false}, for property
      * access.
      * 

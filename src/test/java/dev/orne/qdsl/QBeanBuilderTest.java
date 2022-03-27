@@ -37,6 +37,22 @@ class QBeanBuilderTest {
     }
 
     @Test
+    void testOf() {
+        final QBeanBuilder<TestBean> builder = QBeanBuilder.of(TestBean.class);
+        assertEquals(TestBean.class, builder.getType());
+        assertFalse(builder.isFieldAccess());
+        assertNotNull(builder.getBindings());
+        assertTrue(builder.getBindings().isEmpty());
+    }
+
+    @Test
+    void testOf_Null() {
+        assertThrows(NullPointerException.class, () -> {
+            QBeanBuilder.of(null);
+        });
+    }
+
+    @Test
     void testWithFieldAccess() {
         final QBeanBuilder<TestBean> builder = new QBeanBuilder<>(TestBean.class)
                 .withFieldAccess(true);
