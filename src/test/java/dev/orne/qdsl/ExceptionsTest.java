@@ -29,6 +29,9 @@ import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import dev.orne.qdsl.wrap.ClauseProviderNotFoundException;
+import dev.orne.qdsl.wrap.EntityPathNotSupportedException;
+
 /**
  * Unit tests for library exceptions.
  * 
@@ -36,6 +39,8 @@ import org.junit.jupiter.api.Test;
  * @version 1.0, 2022-03
  * @since 0.1
  * @see QueryTranslationException
+ * @see EntityPathNotSupportedException
+ * @see ClauseProviderNotFoundException
  */
 @Tag("ut")
 class ExceptionsTest {
@@ -53,6 +58,31 @@ class ExceptionsTest {
         assertMessageException(new QueryTranslationException(TEST_MESSAGE));
         assertCauseException(new QueryTranslationException(TEST_CAUSE));
         assertFullException(new QueryTranslationException(TEST_MESSAGE, TEST_CAUSE));
+    }
+
+    /**
+     * Test for {@link EntityPathNotSupportedException}.
+     */
+    @Test
+    void testEntityPathNotSupportedException() {
+        assertMessageException(new EntityPathNotSupportedException(TEST_MESSAGE));
+        assertCauseException(new EntityPathNotSupportedException(TEST_CAUSE));
+        assertFullException(new EntityPathNotSupportedException(TEST_MESSAGE, TEST_CAUSE));
+        final EntityPathNotSupportedException classException =
+                new EntityPathNotSupportedException(TestClass.class);
+        assertNotNull(classException);
+        assertNotNull(classException.getMessage());
+        assertNull(classException.getCause());
+    }
+
+    /**
+     * Test for {@link ClauseProviderNotFoundException}.
+     */
+    @Test
+    void testClauseProviderNotFoundException() {
+        assertMessageException(new ClauseProviderNotFoundException(TEST_MESSAGE));
+        assertCauseException(new ClauseProviderNotFoundException(TEST_CAUSE));
+        assertFullException(new ClauseProviderNotFoundException(TEST_MESSAGE, TEST_CAUSE));
     }
 
     /**
@@ -95,4 +125,6 @@ class ExceptionsTest {
         assertNotNull(exception.getCause());
         assertSame(TEST_CAUSE, exception.getCause());
     }
+
+    private static class TestClass {}
 }

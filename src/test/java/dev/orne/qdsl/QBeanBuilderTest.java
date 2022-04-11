@@ -32,12 +32,12 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.QBean;
 
 /**
- * Unit tests for {@code SimplePathTranslator}.
+ * Unit tests for {@code QBeanBuilder}.
  *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2021-12
  * @since 0.1
- * @see SimplePathTranslator
+ * @see QBeanBuilder
  */
 @Tag("ut")
 class QBeanBuilderTest {
