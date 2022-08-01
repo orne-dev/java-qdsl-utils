@@ -4,7 +4,7 @@ package dev.orne.qdsl.wrap;
  * #%L
  * Orne Querydsl Utils
  * %%
- * Copyright (C) 2022 Orne Developments
+ * Copyright (C) 2021 - 2022 Orne Developments
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -24,38 +24,32 @@ package dev.orne.qdsl.wrap;
 
 import javax.validation.constraints.NotNull;
 
-import org.apiguardian.api.API;
-
-import com.querydsl.core.dml.StoreClause;
-
 /**
- * Extension of {@code StoreClause} that provides additional methods to bind
- * values through {@code ValueStoreClause} and {@code ValueStoreClause}.
- * 
+ * Visitor signature for {@link StoredValue} instances that
+ * replaces the visited assignment with the returned assignments.
+ * <p>
+ * Provides a default {@code ValuesStoreClauseReplaceVisitor}
+ * implementation that aggregates the result of visiting each
+ * internal {@link StoredValue}.
+ *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
- * @param <C> The clause type
+ * @param <C> Context type
  * @since 0.1
  */
-@API(status=API.Status.EXPERIMENTAL, since="0.1")
-public interface ExtendedStoreClause<C extends ExtendedStoreClause<C>>
-extends StoreClause<C> {
+public interface StoredValueReplaceVisitor<C>
+extends StoredValueVisitor<StoredValues, C>,
+        StoredValuesReplaceVisitor<C> {
 
-    /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
-     */
-    @NotNull C set(
-            @NotNull StoredValue<?>... assignments);
-
-    /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
-     */
-    @NotNull C set(
-            @NotNull StoredValues assignments);
+    @Override
+    default StoredValues visit(
+            final @NotNull StoredValues expr,
+            final C context) {
+        return expr.parallelStream()
+                .map(p -> p.accept(this, null))
+                .collect(
+                        StoredValues::new,
+                        StoredValues::addAll,
+                        StoredValues::addAll);
+    }
 }

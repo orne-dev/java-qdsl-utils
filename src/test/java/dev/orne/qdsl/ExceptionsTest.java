@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import dev.orne.qdsl.wrap.ClauseProviderNotFoundException;
 import dev.orne.qdsl.wrap.EntityPathNotSupportedException;
+import dev.orne.qdsl.wrap.impl.ExpressionTransformationException;
 
 /**
  * Unit tests for library exceptions.
@@ -38,7 +39,7 @@ import dev.orne.qdsl.wrap.EntityPathNotSupportedException;
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-03
  * @since 0.1
- * @see QueryTranslationException
+ * @see ExpressionTransformationException
  * @see EntityPathNotSupportedException
  * @see ClauseProviderNotFoundException
  */
@@ -51,13 +52,13 @@ class ExceptionsTest {
     private static final Throwable TEST_CAUSE = new Exception();
 
     /**
-     * Test for {@link QueryTranslationException}.
+     * Test for {@link ExpressionTransformationException}.
      */
     @Test
     void testQueryTranslationException() {
-        assertMessageException(new QueryTranslationException(TEST_MESSAGE));
-        assertCauseException(new QueryTranslationException(TEST_CAUSE));
-        assertFullException(new QueryTranslationException(TEST_MESSAGE, TEST_CAUSE));
+        assertMessageException(new ExpressionTransformationException(TEST_MESSAGE));
+        assertCauseException(new ExpressionTransformationException(TEST_CAUSE));
+        assertFullException(new ExpressionTransformationException(TEST_MESSAGE, TEST_CAUSE));
     }
 
     /**

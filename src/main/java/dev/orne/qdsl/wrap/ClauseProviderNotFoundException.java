@@ -1,7 +1,5 @@
 package dev.orne.qdsl.wrap;
 
-import org.apiguardian.api.API;
-
 /*-
  * #%L
  * Orne Querydsl Utils
@@ -23,6 +21,8 @@ import org.apiguardian.api.API;
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
  * #L%
  */
+
+import org.apiguardian.api.API;
 
 /**
  * Exception thrown when a clause is requested for an entity and no provider

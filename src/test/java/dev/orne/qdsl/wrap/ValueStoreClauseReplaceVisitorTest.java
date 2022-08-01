@@ -39,7 +39,7 @@ import com.querydsl.core.types.dsl.StringPath;
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
  * @since 0.1
- * @see ValueStoreClauseReplaceVisitor
+ * @see StoredValueReplaceVisitor
  */
 @Tag("ut")
 class ValueStoreClauseReplaceVisitorTest {
@@ -66,52 +66,51 @@ class ValueStoreClauseReplaceVisitorTest {
     private static final Expression<String> VALUE_B =
             Expressions.constant(STR_B);
 
-    private static final ValueStoreClause<String> NULL_ASSIGNMENT_A =
-            ValueStoreClause.of(PROPERTY_A_PATH, (String) null);
-    private static final ValueStoreClause<String> VALUE_A_ASSIGNMENT_A =
-            ValueStoreClause.of(PROPERTY_A_PATH, VALUE_A);
-    private static final ValueStoreClause<String> VALUE_A_ASSIGNMENT_B =
-            ValueStoreClause.of(PROPERTY_B_PATH, VALUE_A);
-    private static final ValueStoreClause<String> VALUE_B_ASSIGNMENT_B =
-            ValueStoreClause.of(PROPERTY_B_PATH, VALUE_B);
-    private static final ValueStoreClause<String> VALUE_B_ASSIGNMENT_C =
-            ValueStoreClause.of(PROPERTY_C_PATH, VALUE_B);
+    private static final StoredValue<String> NULL_ASSIGNMENT_A =
+            StoredValue.of(PROPERTY_A_PATH, (String) null);
+    private static final StoredValue<String> VALUE_A_ASSIGNMENT_A =
+            StoredValue.of(PROPERTY_A_PATH, VALUE_A);
+    private static final StoredValue<String> VALUE_A_ASSIGNMENT_B =
+            StoredValue.of(PROPERTY_B_PATH, VALUE_A);
+    private static final StoredValue<String> VALUE_B_ASSIGNMENT_B =
+            StoredValue.of(PROPERTY_B_PATH, VALUE_B);
+    private static final StoredValue<String> VALUE_B_ASSIGNMENT_C =
+            StoredValue.of(PROPERTY_C_PATH, VALUE_B);
 
     /**
-     * Test for {@link ValueStoreClauseReplaceVisitor#visit(ValuesStoreClause, Object)}
+     * Test for {@link StoredValueReplaceVisitor#visit(StoredValues, Object)}
      */
     @Test
     void testVisisClausesEqual() {
-        final ValuesStoreClause clauses = ValuesStoreClause.of(
+        final StoredValues clauses = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
-        final ValuesStoreClause backup = clauses.clone();
-        final ValueStoreClauseReplaceVisitor<?> visitor = spy(ValueStoreClauseReplaceVisitor.class);
-        given(visitor.visit(NULL_ASSIGNMENT_A, null)).willReturn(ValuesStoreClause.of(NULL_ASSIGNMENT_A));
-        given(visitor.visit(VALUE_A_ASSIGNMENT_B, null)).willReturn(ValuesStoreClause.of(VALUE_A_ASSIGNMENT_B));
-        final ValuesStoreClause result = visitor.visit(clauses, null);
-        assertSame(clauses, result);
+        final StoredValues backup = clauses.clone();
+        final StoredValueReplaceVisitor<?> visitor = spy(StoredValueReplaceVisitor.class);
+        given(visitor.visit(NULL_ASSIGNMENT_A, null)).willReturn(StoredValues.with(NULL_ASSIGNMENT_A));
+        given(visitor.visit(VALUE_A_ASSIGNMENT_B, null)).willReturn(StoredValues.with(VALUE_A_ASSIGNMENT_B));
+        final StoredValues result = visitor.visit(clauses, null);
         assertEquals(backup, result);
         then(visitor).should().visit(NULL_ASSIGNMENT_A, null);
         then(visitor).should().visit(VALUE_A_ASSIGNMENT_B, null);
     }
 
     /**
-     * Test for {@link ValueStoreClauseReplaceVisitor#visit(ValuesStoreClause, Object)}
+     * Test for {@link StoredValueReplaceVisitor#visit(StoredValues, Object)}
      */
     @Test
     void testVisisClausesModified() {
-        final ValuesStoreClause clauses = ValuesStoreClause.of(
+        final StoredValues clauses = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
-        final ValueStoreClauseReplaceVisitor<?> visitor = spy(ValueStoreClauseReplaceVisitor.class);
-        given(visitor.visit(NULL_ASSIGNMENT_A, null)).willReturn(ValuesStoreClause.of(VALUE_A_ASSIGNMENT_A));
-        given(visitor.visit(VALUE_A_ASSIGNMENT_B, null)).willReturn(ValuesStoreClause.of(VALUE_B_ASSIGNMENT_B, VALUE_B_ASSIGNMENT_C));
-        final ValuesStoreClause expected = ValuesStoreClause.of(
+        final StoredValueReplaceVisitor<?> visitor = spy(StoredValueReplaceVisitor.class);
+        given(visitor.visit(NULL_ASSIGNMENT_A, null)).willReturn(StoredValues.with(VALUE_A_ASSIGNMENT_A));
+        given(visitor.visit(VALUE_A_ASSIGNMENT_B, null)).willReturn(StoredValues.with(VALUE_B_ASSIGNMENT_B, VALUE_B_ASSIGNMENT_C));
+        final StoredValues expected = StoredValues.with(
                 VALUE_A_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B,
                 VALUE_B_ASSIGNMENT_C);
-        final ValuesStoreClause result = visitor.visit(clauses, null);
+        final StoredValues result = visitor.visit(clauses, null);
         assertNotSame(clauses, result);
         assertEquals(expected, result);
         then(visitor).should().visit(NULL_ASSIGNMENT_A, null);

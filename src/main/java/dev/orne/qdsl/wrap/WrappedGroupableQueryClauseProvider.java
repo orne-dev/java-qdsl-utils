@@ -26,36 +26,24 @@ import javax.validation.constraints.NotNull;
 
 import org.apiguardian.api.API;
 
-import com.querydsl.core.dml.StoreClause;
+import com.querydsl.core.types.EntityPath;
 
 /**
- * Extension of {@code StoreClause} that provides additional methods to bind
- * values through {@code ValueStoreClause} and {@code ValueStoreClause}.
+ * Provider of wrapped QueryDSL Query clauses and projection expressions
+ * that return clauses implementing .{@code ExtendedGroupableQueryClause}
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
- * @param <C> The clause type
  * @since 0.1
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
-public interface ExtendedStoreClause<C extends ExtendedStoreClause<C>>
-extends StoreClause<C> {
+public interface WrappedGroupableQueryClauseProvider
+extends WrappedQueryClauseProvider {
 
     /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
+     * {@inheritDoc}
      */
-    @NotNull C set(
-            @NotNull StoredValue<?>... assignments);
-
-    /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
-     */
-    @NotNull C set(
-            @NotNull StoredValues assignments);
+    @Override
+    @NotNull ExtendedGroupableQueryClause<?, ?> query(
+            @NotNull EntityPath<?> entity);
 }

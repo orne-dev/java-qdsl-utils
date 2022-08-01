@@ -22,6 +22,9 @@ package dev.orne.qdsl.wrap;
  * #L%
  */
 
+import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheResult;
 import javax.validation.constraints.NotNull;
 
 import org.apiguardian.api.API;
@@ -39,6 +42,7 @@ import com.querydsl.core.types.EntityPath;
  * @see WrappedClauseFactory
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
+@CacheDefaults(cacheName="dev.orne.qdsl.wrap.WrappedClauseProviderRegistry")
 public interface WrappedClauseProviderRegistry {
 
     /**
@@ -51,6 +55,8 @@ public interface WrappedClauseProviderRegistry {
      * @return The registered wrapped clause provider that supports the  entity
      * path type, or {@code null} if no provider is available
      */
+    @CachePut
+    @CacheResult
     <T extends WrappedClauseProvider> T find(
             @NotNull Class<T> type,
             @NotNull Class<? extends EntityPath<?>> entityType);

@@ -24,10 +24,13 @@ package dev.orne.qdsl;
 
 import static org.mockito.BDDMockito.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
 import com.querydsl.core.types.Expression;
@@ -36,16 +39,33 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Visitor;
 
+import dev.orne.qdsl.wrap.StoredValue;
+import dev.orne.qdsl.wrap.StoredValueReplaceVisitor;
+import dev.orne.qdsl.wrap.StoredValues;
+import dev.orne.qdsl.wrap.StoredValuesReplaceVisitor;
+import dev.orne.qdsl.wrap.impl.transform.StoredValuesTransformer;
+
 public class TestTypes {
 
-    static interface SimpleType {}
+    private static final Class<?>[] TYPES = new Class<?>[] {
+        Boolean.class,
+        String.class,
+        Integer.class,
+        Long.class,
+        BigInteger.class,
+        BigDecimal.class,
+        SimpleType.class,
+        ComparableType.class
+    };
 
-    static interface UnrelatedType {}
+    public static interface SimpleType {}
 
-    static interface ComparableType
+    public static interface UnrelatedType {}
+
+    public static interface ComparableType
     extends Comparable<ComparableType> {}
 
-    static interface OrderSpecifierReplacer
+    public static interface OrderSpecifierReplacer
     extends Visitor<Expression<?>, Void>,
             OrderSpecifierReplaceVisitor<Void> {
         /**
@@ -58,20 +78,85 @@ public class TestTypes {
                 Void context);
     }
 
-    static interface ValueAssignmentReplacer
+    public static interface StoredValuesTransformerVisitor
     extends Visitor<Expression<?>, Void>,
-            ValueAssignmentReplaceVisitor<Void> {
+            StoredValuesTransformer {
         /**
          * {@inheritDoc}
          * To help Mockito resolve generic types.
          */
         @Override
-        ValueAssignments visit(
-                @NotNull ValueAssignment<?> expr,
+        Void visit(
+                @NotNull StoredValues expr,
                 Void context);
     }
 
-    static <T> Path<T> pathOf(
+    public static interface StoredValuesReplacer
+    extends Visitor<Expression<?>, Void>,
+            StoredValuesReplaceVisitor<Void> {
+        /**
+         * {@inheritDoc}
+         * To help Mockito resolve generic types.
+         */
+        @Override
+        StoredValues visit(
+                @NotNull StoredValues expr,
+                Void context);
+    }
+
+    public static interface StoredValueReplacer
+    extends Visitor<Expression<?>, Void>,
+            StoredValueReplaceVisitor<Void> {
+        /**
+         * {@inheritDoc}
+         * To help Mockito resolve generic types.
+         */
+        @Override
+        StoredValues visit(
+                @NotNull StoredValue<?> expr,
+                Void context);
+    }
+
+    public static Class<?> randomPathType() {
+        return TYPES[RandomUtils.nextInt(0, TYPES.length)];
+    }
+
+    public static Path<?> randomPath() {
+        return pathOf(randomPathType());
+    }
+
+    public static Expression<?> randomExpression() {
+        return expressionOf(randomPathType());
+    }
+
+    public static <T> T randomValue(
+            final Class<T> type) {
+        final Object result;
+        if (Boolean.class.equals(type)) {
+            result = RandomUtils.nextBoolean();
+        } else if (String.class.equals(type)) {
+            result = RandomStringUtils.random(10);
+        } else if (Integer.class.equals(type)) {
+            result = RandomUtils.nextInt();
+        } else if (Long.class.equals(type)) {
+            result = RandomUtils.nextLong();
+        } else if (BigInteger.class.equals(type)) {
+            result = BigInteger.valueOf(RandomUtils.nextLong());
+        } else if (BigDecimal.class.equals(type)) {
+            result = BigDecimal.valueOf(RandomUtils.nextLong(), RandomUtils.nextInt());
+        } else if (SimpleType.class.equals(type)) {
+            result = mock(SimpleType.class);
+        } else if (UnrelatedType.class.equals(type)) {
+            result = mock(UnrelatedType.class);
+        } else if (ComparableType.class.equals(type)) {
+            result = mock(ComparableType.class);
+        } else {
+            throw new IllegalArgumentException("Unsupported type");
+        }
+        return type.cast(result);
+    }
+
+    public static <T> Path<T> pathOf(
             final Class<T> type) {
         @SuppressWarnings("unchecked")
         final Path<T> expr = mock(Path.class);
@@ -79,7 +164,7 @@ public class TestTypes {
         return expr;
     }
 
-    static <T> Expression<T> expressionOf(
+    public static <T> Expression<T> expressionOf(
             final Class<T> type) {
         @SuppressWarnings("unchecked")
         final Expression<T> expr = mock(Expression.class);
@@ -87,11 +172,11 @@ public class TestTypes {
         return expr;
     }
 
-    static OrderSpecifier<ComparableType> randomOrderSpecifier() {
+    public static OrderSpecifier<ComparableType> randomOrderSpecifier() {
         return randomOrderSpecifier(expressionOf(ComparableType.class));
     }
 
-    static <T extends Comparable<?>> OrderSpecifier<T> randomOrderSpecifier(
+    public static <T extends Comparable<?>> OrderSpecifier<T> randomOrderSpecifier(
             final Expression<T> expr) {
         @SuppressWarnings("unchecked")
         final OrderSpecifier<T> result = mock(OrderSpecifier.class);
@@ -104,21 +189,30 @@ public class TestTypes {
         return result;
     }
 
-    static <T extends Enum<T>> T randomEnum(
+    public static <T extends Enum<T>> T randomEnum(
             final Class<T> type) {
         final T[] constants = type.getEnumConstants();
         final int index = RandomUtils.nextInt(0, constants.length);
         return constants[index];
     }
 
-    static ValueAssignment<SimpleType> randomValueAssignment() {
-        return randomValueAssignment(pathOf(SimpleType.class));
+    public static StoredValue<?> randomStoredValue() {
+        return randomStoredValue(randomPath());
     }
 
-    static <T> ValueAssignment<T> randomValueAssignment(
+    public static <T> StoredValue<T> randomStoredValue(
             final Path<T> path) {
-        return new ValueAssignment<>(
+        return StoredValue.of(
                 path,
                 expressionOf(path.getType()));
+    }
+
+    public static StoredValues randomStoredValues() {
+        final int count = RandomUtils.nextInt(1, 10);
+        final StoredValues result = new StoredValues(count);
+        for (int i = 0; i < count; i++) {
+            result.add(randomStoredValue());
+        }
+        return result;
     }
 }

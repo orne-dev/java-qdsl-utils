@@ -22,40 +22,16 @@ package dev.orne.qdsl.wrap;
  * #L%
  */
 
-import javax.validation.constraints.NotNull;
-
-import org.apiguardian.api.API;
-
-import com.querydsl.core.dml.StoreClause;
-
 /**
- * Extension of {@code StoreClause} that provides additional methods to bind
- * values through {@code ValueStoreClause} and {@code ValueStoreClause}.
- * 
+ * Visitor signature for {@link StoredValues} instances that
+ * return replaces the visited assignments with the returned assignments.
+ *
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
- * @param <C> The clause type
+ * @param <C> Context type
  * @since 0.1
  */
-@API(status=API.Status.EXPERIMENTAL, since="0.1")
-public interface ExtendedStoreClause<C extends ExtendedStoreClause<C>>
-extends StoreClause<C> {
-
-    /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
-     */
-    @NotNull C set(
-            @NotNull StoredValue<?>... assignments);
-
-    /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
-     */
-    @NotNull C set(
-            @NotNull StoredValues assignments);
+public interface StoredValuesReplaceVisitor<C>
+extends StoredValuesVisitor<StoredValues, C> {
+    // No extra methods
 }

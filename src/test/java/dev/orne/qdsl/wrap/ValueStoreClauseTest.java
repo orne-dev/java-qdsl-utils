@@ -4,7 +4,7 @@ package dev.orne.qdsl.wrap;
  * #%L
  * Orne Querydsl Utils
  * %%
- * Copyright (C) 2021-2022 Orne Developments
+ * Copyright (C) 2021 - 2022 Orne Developments
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -42,7 +42,7 @@ import com.querydsl.core.types.dsl.StringPath;
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
  * @since 0.1
- * @see ValueStoreClause
+ * @see StoredValue
  */
 @Tag("ut")
 class ValueStoreClauseTest {
@@ -60,8 +60,8 @@ class ValueStoreClauseTest {
 
     @Test
     void testOfNullValue() {
-        final ValueStoreClause<String> result =
-                ValueStoreClause.of(PROPERTY_A_PATH, (String) null);
+        final StoredValue<String> result =
+                StoredValue.of(PROPERTY_A_PATH, (String) null);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertNull(result.getValue());
@@ -71,8 +71,8 @@ class ValueStoreClauseTest {
     @Test
     void testOfValue() {
         final String value = "Test value";
-        final ValueStoreClause<String> result =
-                ValueStoreClause.of(PROPERTY_A_PATH, value);
+        final StoredValue<String> result =
+                StoredValue.of(PROPERTY_A_PATH, value);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertNotNull(result.getValue());
@@ -84,8 +84,8 @@ class ValueStoreClauseTest {
     @Test
     void testOfNullExpression() {
         final Expression<String> value = null;
-        final ValueStoreClause<String> result =
-                ValueStoreClause.of(PROPERTY_A_PATH, value);
+        final StoredValue<String> result =
+                StoredValue.of(PROPERTY_A_PATH, value);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertNull(result.getValue());
@@ -95,8 +95,8 @@ class ValueStoreClauseTest {
     @Test
     void testOfExpression() {
         final Expression<String> value = Expressions.asString("some");
-        final ValueStoreClause<String> result =
-                ValueStoreClause.of(PROPERTY_A_PATH, value);
+        final StoredValue<String> result =
+                StoredValue.of(PROPERTY_A_PATH, value);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertSame(value, result.getValue());
@@ -106,8 +106,8 @@ class ValueStoreClauseTest {
     @Test
     void testOfUntypedNullExpression() {
         final Expression<?> value = null;
-        final ValueStoreClause<String> result =
-                ValueStoreClause.ofUntyped(PROPERTY_A_PATH, value);
+        final StoredValue<String> result =
+                StoredValue.ofUntyped(PROPERTY_A_PATH, value);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertNull(result.getValue());
@@ -118,8 +118,8 @@ class ValueStoreClauseTest {
     void testOfUntypedExpression() {
         final Expression<String> value = Expressions.asString("some");
         final Expression<?> uvalue = (Expression<?>) value;
-        final ValueStoreClause<String> result =
-                ValueStoreClause.ofUntyped(PROPERTY_A_PATH, uvalue);
+        final StoredValue<String> result =
+                StoredValue.ofUntyped(PROPERTY_A_PATH, uvalue);
         assertNotNull(result);
         assertSame(PROPERTY_A_PATH, result.getPath());
         assertSame(value, result.getValue());
@@ -131,26 +131,26 @@ class ValueStoreClauseTest {
         final Expression<Integer> value = Expressions.asNumber(10);
         final Expression<?> uvalue = (Expression<?>) value;
         assertThrows(IllegalArgumentException.class, () -> {
-            ValueStoreClause.ofUntyped(PROPERTY_A_PATH, uvalue);
+            StoredValue.ofUntyped(PROPERTY_A_PATH, uvalue);
         });
     }
 
     @Test
     void testAccept() {
-        final ValueStoreClause<?> assignment = spy(ValueStoreClause.of(PROPERTY_A_PATH, "someValue"));
-        final ValueStoreClauseVisitor<?, ?> visitor = mock(ValueStoreClauseVisitor.class);
+        final StoredValues storedValues = new StoredValues();
+        final StoredValuesVisitor<?, ?> visitor = mock(StoredValuesVisitor.class);
         final Object expected = new Object();
-        willReturn(expected).given(visitor).visit(assignment, null);
-        final Object result = assignment.accept(visitor, null);
-        then(visitor).should().visit(assignment, null);
+        willReturn(expected).given(visitor).visit(storedValues, null);
+        final Object result = storedValues.accept(visitor, null);
+        then(visitor).should().visit(storedValues, null);
         assertSame(expected, result);
     }
 
     @Test
     void testApply() {
         final Expression<String> value = Expressions.constant("Test value");
-        final ValueStoreClause<String> assignment =
-                ValueStoreClause.of(PROPERTY_A_PATH, value);
+        final StoredValue<String> assignment =
+                StoredValue.of(PROPERTY_A_PATH, value);
         final StoreClause<?> clause = mock(StoreClause.class);
         willReturn(clause).given(clause).set(PROPERTY_A_PATH, value);
         final StoreClause<?> result = assignment.apply(clause);
@@ -160,8 +160,8 @@ class ValueStoreClauseTest {
 
     @Test
     void testApplyNull() {
-        final ValueStoreClause<String> assignment =
-                ValueStoreClause.of(PROPERTY_A_PATH, (String) null);
+        final StoredValue<String> assignment =
+                StoredValue.of(PROPERTY_A_PATH, (String) null);
         final StoreClause<?> clause = mock(StoreClause.class);
         willReturn(clause).given(clause).setNull(PROPERTY_A_PATH);
         final StoreClause<?> result = assignment.apply(clause);
@@ -174,18 +174,18 @@ class ValueStoreClauseTest {
         final String value = "Test value";
         Path<String> altPropAPath = new PathBuilder<String>(String.class, ENTITY)
                 .getSimple(PROPERTY_A, String.class);
-        final ValueStoreClause<String> resultA =
-                ValueStoreClause.of(PROPERTY_A_PATH, value);
-        final ValueStoreClause<String> resultB =
-                ValueStoreClause.of(altPropAPath, value);
-        final ValueStoreClause<String> resultC =
-                ValueStoreClause.of(PROPERTY_B_PATH, value);
-        final ValueStoreClause<String> resultD =
-                ValueStoreClause.of(altPropAPath, (String) null);
-        final ValueStoreClause<String> resultE =
-                ValueStoreClause.of(altPropAPath, Expressions.constant(value));
-        final ValueStoreClause<String> resultF =
-                ValueStoreClause.of(altPropAPath,
+        final StoredValue<String> resultA =
+                StoredValue.of(PROPERTY_A_PATH, value);
+        final StoredValue<String> resultB =
+                StoredValue.of(altPropAPath, value);
+        final StoredValue<String> resultC =
+                StoredValue.of(PROPERTY_B_PATH, value);
+        final StoredValue<String> resultD =
+                StoredValue.of(altPropAPath, (String) null);
+        final StoredValue<String> resultE =
+                StoredValue.of(altPropAPath, Expressions.constant(value));
+        final StoredValue<String> resultF =
+                StoredValue.of(altPropAPath,
                         Expressions.asString(value).toLowerCase());
         assertFalse(resultA.equals(null));
         assertTrue(resultA.equals(resultA));

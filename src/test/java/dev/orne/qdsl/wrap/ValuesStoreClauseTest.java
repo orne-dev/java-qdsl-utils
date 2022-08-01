@@ -4,7 +4,7 @@ package dev.orne.qdsl.wrap;
  * #%L
  * Orne Querydsl Utils
  * %%
- * Copyright (C) 2021-2022 Orne Developments
+ * Copyright (C) 2021 - 2022 Orne Developments
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -50,7 +50,7 @@ import com.querydsl.core.types.dsl.StringPath;
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
  * @since 0.1
- * @see ValuesStoreClause
+ * @see StoredValues
  */
 @Tag("ut")
 class ValuesStoreClauseTest {
@@ -77,18 +77,18 @@ class ValuesStoreClauseTest {
     private static final Expression<String> VALUE_B =
             Expressions.constant(STR_B);
 
-    private static final ValueStoreClause<String> NULL_ASSIGNMENT_A =
-            ValueStoreClause.of(PROPERTY_A_PATH, (String) null);
-    private static final ValueStoreClause<String> NULL_ASSIGNMENT_B =
-            ValueStoreClause.of(PROPERTY_B_PATH, (String) null);
-    private static final ValueStoreClause<String> VALUE_A_ASSIGNMENT_A =
-            ValueStoreClause.of(PROPERTY_A_PATH, VALUE_A);
-    private static final ValueStoreClause<String> VALUE_A_ASSIGNMENT_B =
-            ValueStoreClause.of(PROPERTY_B_PATH, VALUE_A);
-    private static final ValueStoreClause<String> VALUE_B_ASSIGNMENT_A =
-            ValueStoreClause.of(PROPERTY_A_PATH, VALUE_B);
-    private static final ValueStoreClause<String> VALUE_B_ASSIGNMENT_B =
-            ValueStoreClause.of(PROPERTY_B_PATH, VALUE_B);
+    private static final StoredValue<String> NULL_ASSIGNMENT_A =
+            StoredValue.of(PROPERTY_A_PATH, (String) null);
+    private static final StoredValue<String> NULL_ASSIGNMENT_B =
+            StoredValue.of(PROPERTY_B_PATH, (String) null);
+    private static final StoredValue<String> VALUE_A_ASSIGNMENT_A =
+            StoredValue.of(PROPERTY_A_PATH, VALUE_A);
+    private static final StoredValue<String> VALUE_A_ASSIGNMENT_B =
+            StoredValue.of(PROPERTY_B_PATH, VALUE_A);
+    private static final StoredValue<String> VALUE_B_ASSIGNMENT_A =
+            StoredValue.of(PROPERTY_A_PATH, VALUE_B);
+    private static final StoredValue<String> VALUE_B_ASSIGNMENT_B =
+            StoredValue.of(PROPERTY_B_PATH, VALUE_B);
     private AutoCloseable mocks;
 
     @BeforeEach
@@ -103,7 +103,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testEmptyConstructor() {
-        final ValuesStoreClause result = new ValuesStoreClause();
+        final StoredValues result = new StoredValues();
         assertNotNull(result);
         assertTrue(result.isEmpty());
         assertEquals(0, result.size());
@@ -112,10 +112,10 @@ class ValuesStoreClauseTest {
 
     @Test
     void testCopyConstructor() {
-        final ValuesStoreClause initial = ValuesStoreClause.of(
+        final StoredValues initial = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
-        final ValuesStoreClause result = new ValuesStoreClause(initial);
+        final StoredValues result = new StoredValues(initial);
         assertNotNull(result);
         assertEquals(initial, result);
         assertEquals(initial.hashCode(), result.hashCode());
@@ -123,10 +123,10 @@ class ValuesStoreClauseTest {
 
     @Test
     void testClone() {
-        final ValuesStoreClause initial = ValuesStoreClause.of(
+        final StoredValues initial = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
-        final ValuesStoreClause result = initial.clone();
+        final StoredValues result = initial.clone();
         assertNotNull(result);
         assertEquals(initial, result);
         assertEquals(initial.hashCode(), result.hashCode());
@@ -134,20 +134,20 @@ class ValuesStoreClauseTest {
 
     @Test
     void testEquals() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         assertFalse(bean.equals(null));
         assertTrue(bean.equals(bean));
         assertFalse(bean.equals(new Object()));
-        assertFalse(bean.equals(ValuesStoreClause.of(
+        assertFalse(bean.equals(StoredValues.with(
                 VALUE_A_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B)));
     }
 
     @Test
     void testCreateEmpty() {
-        final ValuesStoreClause result = ValuesStoreClause.of();
+        final StoredValues result = StoredValues.with();
         assertNotNull(result);
         assertTrue(result.isEmpty());
         assertEquals(0, result.size());
@@ -156,7 +156,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testCreateVarargs() {
-        final ValuesStoreClause result = ValuesStoreClause.of(
+        final StoredValues result = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         assertNotNull(result);
@@ -171,7 +171,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testCreateCollection() {
-        final ValuesStoreClause result = ValuesStoreClause.of(Arrays.asList(
+        final StoredValues result = StoredValues.with(Arrays.asList(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B));
         assertNotNull(result);
@@ -186,7 +186,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testPaths() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         final Set<Path<?>> result = bean.paths();
@@ -198,7 +198,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testGetOrDefault() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         assertNull(bean.get(PROPERTY_A_PATH));
@@ -212,7 +212,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testGetAssignment() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         assertNull(bean.getAssignment(PROPERTY_A_PATH));
         assertEquals(VALUE_A_ASSIGNMENT_B, bean.getAssignment(PROPERTY_B_PATH));
@@ -220,7 +220,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testGetAssignmentOrDefault() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         assertNull(bean.getAssignment(PROPERTY_A_PATH));
         assertEquals(VALUE_B_ASSIGNMENT_A, bean.getAssignmentOrDefault(PROPERTY_A_PATH, VALUE_B));
@@ -230,7 +230,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testClear() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         bean.clear();
@@ -241,7 +241,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddAssignment() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(VALUE_B_ASSIGNMENT_A);
         assertNull(result);
@@ -254,7 +254,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testReplaceAssignment() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(VALUE_B_ASSIGNMENT_B);
         assertEquals(VALUE_A, result);
@@ -267,7 +267,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddPathValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(PROPERTY_A_PATH, STR_B);
         assertNull(result);
@@ -280,7 +280,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddPathNullValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(PROPERTY_A_PATH, (String) null);
         assertNull(result);
@@ -293,7 +293,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testReplacePathValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(PROPERTY_B_PATH, STR_B);
         assertEquals(VALUE_A, result);
@@ -306,7 +306,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testReplacePathNullValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.add(PROPERTY_B_PATH, (String) null);
         assertEquals(VALUE_A, result);
@@ -319,7 +319,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentAssignment() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_A);
         assertNull(result);
@@ -332,7 +332,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentExistingAssignment() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(VALUE_B_ASSIGNMENT_B);
         assertEquals(VALUE_A, result);
@@ -345,7 +345,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentPathValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_A_PATH, STR_B);
         assertNull(result);
@@ -358,7 +358,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentPathNullValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_A_PATH, (String) null);
         assertNull(result);
@@ -371,7 +371,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentExitingPathValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_B_PATH, STR_B);
         assertEquals(VALUE_A, result);
@@ -384,7 +384,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddIfAbsentExitingPathNullValue() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         final Expression<? extends String> result = bean.addIfAbsent(PROPERTY_B_PATH, (String) null);
         assertEquals(VALUE_A, result);
@@ -397,9 +397,9 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddAllAssignments() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
-        bean.addAll(ValuesStoreClause.of(
+        bean.addAll(StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B));
         assertEquals(2, bean.size());
@@ -411,7 +411,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddAllVarargs() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         bean.addAll(
                 NULL_ASSIGNMENT_A,
@@ -425,7 +425,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAddAllCollection() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_B);
         bean.addAll(Arrays.asList(
                 NULL_ASSIGNMENT_A,
@@ -439,7 +439,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testRemove() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_A_ASSIGNMENT_B);
         final Expression<String> result = bean.remove(PROPERTY_B_PATH);
@@ -453,7 +453,7 @@ class ValuesStoreClauseTest {
 
     @Test
     void testRemoveMissing() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 VALUE_A_ASSIGNMENT_A);
         final Expression<String> result = bean.remove(PROPERTY_B_PATH);
         assertNull(result);
@@ -467,7 +467,7 @@ class ValuesStoreClauseTest {
     @Test
     void testApply() {
         final StoreClause<?> clause = mock(StoreClause.class);
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B);
         final StoreClause<?> result = bean.apply(clause);
@@ -478,8 +478,8 @@ class ValuesStoreClauseTest {
 
     @Test
     void testAccept() {
-        final ValuesStoreClause bean = spy(ValuesStoreClause.class);
-        final ValuesStoreClauseVisitor<?, ?> visitor = mock(ValuesStoreClauseVisitor.class);
+        final StoredValues bean = spy(StoredValues.class);
+        final StoredValuesVisitor<?, ?> visitor = mock(StoredValuesVisitor.class);
         final Object expected = new Object();
         willReturn(expected).given(visitor).visit(bean, null);
         final Object result = bean.accept(visitor, null);
@@ -489,10 +489,10 @@ class ValuesStoreClauseTest {
 
     @Test
     void testIterator() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B);
-        final Iterator<ValueStoreClause<?>> result = bean.iterator();
+        final Iterator<StoredValue<?>> result = bean.iterator();
         assertNotNull(result);
         assertTrue(result.hasNext());
         assertEquals(NULL_ASSIGNMENT_A, result.next());
@@ -503,10 +503,10 @@ class ValuesStoreClauseTest {
 
     @Test
     void testStream() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B);
-        final List<ValueStoreClause<?>> result = new ArrayList<>();
+        final List<StoredValue<?>> result = new ArrayList<>();
         bean.stream().forEach(a -> result.add(a));
         assertNotNull(result);
         assertTrue(result.contains(NULL_ASSIGNMENT_A));
@@ -515,10 +515,10 @@ class ValuesStoreClauseTest {
 
     @Test
     void testParalellStream() {
-        final ValuesStoreClause bean = ValuesStoreClause.of(
+        final StoredValues bean = StoredValues.with(
                 NULL_ASSIGNMENT_A,
                 VALUE_B_ASSIGNMENT_B);
-        final List<ValueStoreClause<?>> result = new ArrayList<>();
+        final List<StoredValue<?>> result = new ArrayList<>();
         bean.parallelStream().forEach(a -> result.add(a));
         assertNotNull(result);
         assertTrue(result.contains(NULL_ASSIGNMENT_A));

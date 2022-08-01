@@ -26,36 +26,35 @@ import javax.validation.constraints.NotNull;
 
 import org.apiguardian.api.API;
 
-import com.querydsl.core.dml.StoreClause;
+import com.querydsl.core.Query;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
 
 /**
- * Extension of {@code StoreClause} that provides additional methods to bind
- * values through {@code ValueStoreClause} and {@code ValueStoreClause}.
+ * Extension of {@code QueryClause} that supports grouping of results.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
  * @version 1.0, 2022-04
+ * @param <T> The query results type
  * @param <C> The clause type
  * @since 0.1
+ * @see Query
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
-public interface ExtendedStoreClause<C extends ExtendedStoreClause<C>>
-extends StoreClause<C> {
+public interface ExtendedGroupableQueryClause<T, C extends ExtendedGroupableQueryClause<T, C>>
+extends ExtendedQueryClause<T, C>, Query<C> {
 
     /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
+     * {@inheritDoc}
      */
-    @NotNull C set(
-            @NotNull StoredValue<?>... assignments);
+    @Override
+    <U> @NotNull ExtendedGroupableQueryClause<U, ?> select(
+            @NotNull Expression<U> expr);
 
     /**
-     * Add multiple value binding
-     *
-     * @param assignments The value binding assignments
-     * @return the current object
+     * {@inheritDoc}
      */
-    @NotNull C set(
-            @NotNull StoredValues assignments);
+    @Override
+    @NotNull ExtendedGroupableQueryClause<Tuple, ?> select(
+            @NotNull Expression<?>... exprs);
 }

@@ -104,6 +104,29 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-sql</artifactId>
+      <version>${querydsl.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-jpa</artifactId>
+      <version>${querydsl.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-collections</artifactId>
+      <version>${querydsl.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>javax.cache</groupId>
+      <artifactId>cache-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
 
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -121,27 +144,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-sql</artifactId>
-      <version>${querydsl.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
       <version>${jakarta.persistence.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-jpa</artifactId>
-      <version>${querydsl.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-collections</artifactId>
-      <version>${querydsl.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

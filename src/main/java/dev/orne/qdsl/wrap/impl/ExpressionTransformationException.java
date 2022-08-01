@@ -1,4 +1,4 @@
-package dev.orne.qdsl.wrap;
+package dev.orne.qdsl.wrap.impl;
 
 /*-
  * #%L
@@ -22,45 +22,20 @@ package dev.orne.qdsl.wrap;
  * #L%
  */
 
-import javax.validation.constraints.NotNull;
-
-import org.apiguardian.api.API;
-
 import com.querydsl.core.QueryException;
 
 /**
- * Exception thrown when clauses of an unsupported entity type are requested
- * to a wrapped clause provider.
- * <p>
- * Typically thrown when call to {@link WrappedClauseProvider#supports(Class)}
- * is omitted before calling clause creation methods.
+ * QueryDSL expression translation exception.
  * 
  * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
- * @version 1.0, 2022-04
+ * @version 1.0, 2022-03
  * @since 0.1
- * @see WrappedClauseProvider
  */
-@API(status=API.Status.EXPERIMENTAL, since="0.1")
-public class EntityPathNotSupportedException
+public class ExpressionTransformationException
 extends QueryException {
 
     /** The serial version UID. */
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Constructs a new exception with the default detail message for the
-     * specified entity path type.
-     * The cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     *
-     * @param entityType The unsupported entity path type
-     */
-    public EntityPathNotSupportedException(
-            final @NotNull Class<?> entityType) {
-        this(String.format(
-                "Entity type %s is not supported",
-                entityType));
-    }
 
     /**
      * Constructs a new exception with the specified detail message.  The
@@ -70,7 +45,7 @@ extends QueryException {
      * @param   message   the detail message. The detail message is saved for
      *          later retrieval by the {@link #getMessage()} method.
      */
-    public EntityPathNotSupportedException(
+    public ExpressionTransformationException(
             final String message) {
         super(message);
     }
@@ -88,7 +63,7 @@ extends QueryException {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public EntityPathNotSupportedException(
+    public ExpressionTransformationException(
             final Throwable cause) {
         super(cause);
     }
@@ -106,7 +81,7 @@ extends QueryException {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public EntityPathNotSupportedException(
+    public ExpressionTransformationException(
             final String message,
             final Throwable cause) {
         super(message, cause);
