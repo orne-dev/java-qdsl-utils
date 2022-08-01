@@ -47,6 +47,9 @@
         01. Added `dev.orne.qdsl.wrap.impl.WrappedInsertClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedUpdateClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedDeleteClause` class.
+        01. Added `dev.orne.qdsl.wrap.impl.AbstractWrappedClauseProviderRegistry` class.
+        01. Added `dev.orne.qdsl.wrap.impl.DefaultWrappedClauseProviderRegistry` class.
+        01. Added `dev.orne.qdsl.wrap.impl.CacheableWrappedClauseProviderRegistry` class.
     01. :gift: Added wrapped clause expression transformation system.
         01. Added `dev.orne.qdsl.wrap.impl.transform.BaseExpressionTransformer` class.
         01. Added `dev.orne.qdsl.wrap.impl.transform.ChainedExpressionTransformer` class.

@@ -100,12 +100,12 @@ extends WrappedStoreClauseTest {
      */
     @Test
     void testSet() {
-        final int count = RandomUtils.nextInt(1, 10);
+        final int count = RandomUtils.nextInt(2, 10);
         final List<Path<?>> paths = new ArrayList<>(count);
         final List<Object> values = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             paths.add(TestTypes.randomPath());
-            if (RandomUtils.nextBoolean()) {
+            if (i % 2 == 0) {
                 values.add(TestTypes.randomValue(paths.get(i).getType()));
             } else {
                 values.add(TestTypes.expressionOf(paths.get(i).getType()));

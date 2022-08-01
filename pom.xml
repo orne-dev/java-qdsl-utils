@@ -51,6 +51,7 @@
 
     <jakarta.validation.version>2.0.2</jakarta.validation.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
+    <javax.cache.api.version>1.1.1</javax.cache.api.version>
 
     <jakarta.persistence.version>2.2.3</jakarta.persistence.version>
     <xerial.sqlite.version>3.36.0.3</xerial.sqlite.version>
@@ -125,7 +126,8 @@
     <dependency>
       <groupId>javax.cache</groupId>
       <artifactId>cache-api</artifactId>
-      <version>1.1.1</version>
+      <version>${javax.cache.api.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
