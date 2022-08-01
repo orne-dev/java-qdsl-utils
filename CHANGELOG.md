@@ -41,6 +41,8 @@
         01. Added `dev.orne.qdsl.wrap.impl.WrappedClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedQueryClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedCollQueryClause` class.
+        01. Added `dev.orne.qdsl.wrap.impl.WrappedSqlQueryClause` class.
+        01. Added `dev.orne.qdsl.wrap.impl.WrappedJpaQueryClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedStoreClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedInsertClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedUpdateClause` class.
