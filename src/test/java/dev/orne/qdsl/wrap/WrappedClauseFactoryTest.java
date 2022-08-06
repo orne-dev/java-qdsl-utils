@@ -54,6 +54,8 @@ class WrappedClauseFactoryTest {
     private @Mock WrappedQueryClauseProvider queryProvider;
     private @Mock Expression<?> projection;
     private @Mock ExtendedQueryClause<?, ?> queryClause;
+    private @Mock WrappedGroupableQueryClauseProvider groupableQueryProvider;
+    private @Mock ExtendedGroupableQueryClause<?, ?> groupableQueryClause;
     private @Mock WrappedInsertClauseProvider insertProvider;
     private @Mock ExtendedInsertClause<?> insertClause;
     private @Mock WrappedUpdateClauseProvider updateProvider;
@@ -209,6 +211,106 @@ class WrappedClauseFactoryTest {
     void testQueryUnconfigured() {
         assertThrows(ClauseProviderNotFoundException.class, () -> {
             WrappedClauseFactory.query(entity);
+        });
+    }
+
+    /**
+     * Unit test for {@link WrappedClauseFactory#queryGroupable(EntityPath)}.
+     */
+    @Test
+    void testQueryGroupable() {
+        WrappedClauseFactory.addRegistry(registry1);
+        WrappedClauseFactory.addRegistry(registry2);
+        WrappedClauseProviderRegistryTest.expectProviderFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType,
+                groupableQueryProvider);
+        WrappedClauseProviderTest.expectCreateClause(groupableQueryProvider, entity, groupableQueryClause);
+        final ExtendedGroupableQueryClause<?, ?> result = WrappedClauseFactory.queryGroupable(entity);
+        assertSame(groupableQueryClause, result);
+        WrappedClauseProviderRegistryTest.assertProviderFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        then(registry1).shouldHaveNoMoreInteractions();
+        then(registry2).shouldHaveNoInteractions();
+        WrappedClauseProviderTest.assertCreateClause(groupableQueryProvider, entity);
+        then(groupableQueryProvider).shouldHaveNoMoreInteractions();
+        then(groupableQueryClause).shouldHaveNoInteractions();
+    }
+
+    /**
+     * Unit test for {@link WrappedClauseFactory#queryGroupable(EntityPath)}.
+     */
+    @Test
+    void testQueryGroupableMultipleRegistries() {
+        WrappedClauseFactory.addRegistry(registry1);
+        WrappedClauseFactory.addRegistry(registry2);
+        WrappedClauseProviderRegistryTest.expectProviderNotFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        WrappedClauseProviderRegistryTest.expectProviderFound(
+                registry2,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType,
+                groupableQueryProvider);
+        WrappedClauseProviderTest.expectCreateClause(groupableQueryProvider, entity, groupableQueryClause);
+        final ExtendedGroupableQueryClause<?, ?> result = WrappedClauseFactory.queryGroupable(entity);
+        assertSame(groupableQueryClause, result);
+        WrappedClauseProviderRegistryTest.assertProviderFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        then(registry1).shouldHaveNoMoreInteractions();
+        WrappedClauseProviderRegistryTest.assertProviderFound(
+                registry2,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        then(registry2).shouldHaveNoMoreInteractions();
+        WrappedClauseProviderTest.assertCreateClause(groupableQueryProvider, entity);
+        then(groupableQueryProvider).shouldHaveNoMoreInteractions();
+        then(groupableQueryClause).shouldHaveNoInteractions();
+    }
+
+    /**
+     * Unit test for {@link WrappedClauseFactory#queryGroupable(EntityPath)}.
+     */
+    @Test
+    void testQueryGroupableNotFound() {
+        WrappedClauseFactory.addRegistry(registry1);
+        WrappedClauseFactory.addRegistry(registry2);
+        WrappedClauseProviderRegistryTest.expectProviderNotFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        WrappedClauseProviderRegistryTest.expectProviderNotFound(
+                registry2,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        assertThrows(ClauseProviderNotFoundException.class, () -> {
+            WrappedClauseFactory.queryGroupable(entity);
+        });
+        WrappedClauseProviderRegistryTest.assertProviderFound(
+                registry1,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        then(registry1).shouldHaveNoMoreInteractions();
+        WrappedClauseProviderRegistryTest.assertProviderFound(
+                registry2,
+                WrappedGroupableQueryClauseProvider.class,
+                entityType);
+        then(registry2).shouldHaveNoMoreInteractions();
+    }
+
+    /**
+     * Unit test for {@link WrappedClauseFactory#queryGroupable(EntityPath)}.
+     */
+    @Test
+    void testQueryGroupableUnconfigured() {
+        assertThrows(ClauseProviderNotFoundException.class, () -> {
+            WrappedClauseFactory.queryGroupable(entity);
         });
     }
 

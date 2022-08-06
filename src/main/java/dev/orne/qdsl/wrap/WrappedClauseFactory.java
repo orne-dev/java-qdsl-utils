@@ -164,6 +164,20 @@ public final class WrappedClauseFactory {
 
     /**
      * Creates a new wrapped Query clause for the specified entity path
+     * with support for grouping of results.
+     * 
+     * @param entity The target entity path
+     * @return The created wrapped Query clause
+     * @throws ClauseProviderNotFoundException If no provider is available
+     * for the requested entity path type
+     */
+    public static @NotNull ExtendedGroupableQueryClause<?, ?> queryGroupable(
+            @NotNull EntityPath<?> entity) {
+        return findProvider(WrappedGroupableQueryClauseProvider.class, entity).query(entity);
+    }
+
+    /**
+     * Creates a new wrapped Query clause for the specified entity path
      * with the default entity projection.
      * 
      * @param <T> The entity type returned by the Query clause
