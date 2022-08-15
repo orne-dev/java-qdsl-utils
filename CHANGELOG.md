@@ -36,6 +36,7 @@
         01. Added `dev.orne.qdsl.wrap.impl.ExpressionTransformationException` exception.
         01. Added `dev.orne.qdsl.wrap.impl.ExpressionTransformer` interface.
         01. Added `dev.orne.qdsl.wrap.impl.NopExpressionTransformer` class.
+        01. Added `dev.orne.qdsl.wrap.impl.EntityAliasReplacer` class.
         01. Added `dev.orne.qdsl.wrap.impl.PreFetchedSubQueryExpression` class.
         01. Added `dev.orne.qdsl.wrap.impl.PreFetchedSubQueryExtractor` class.
         01. Added `dev.orne.qdsl.wrap.impl.WrappedClause` class.
