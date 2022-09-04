@@ -30,6 +30,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apiguardian.api.API;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -48,6 +49,7 @@ import com.querydsl.core.types.dsl.Expressions;
  * @param <C> Context type
  * @since 0.1
  */
+@API(status=API.Status.EXPERIMENTAL, since="0.1")
 public interface OrderSpecifierReplaceVisitor<C>
 extends OrderSpecifierVisitor<List<OrderSpecifier<?>>, C> {
 

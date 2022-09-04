@@ -24,6 +24,8 @@ package dev.orne.qdsl;
 
 import javax.validation.constraints.NotNull;
 
+import org.apiguardian.api.API;
+
 import com.querydsl.core.types.OrderSpecifier;
 
 /**
@@ -36,6 +38,7 @@ import com.querydsl.core.types.OrderSpecifier;
  * @param <C> Context type
  * @since 0.1
  */
+@API(status=API.Status.EXPERIMENTAL, since="0.1")
 public interface OrderSpecifierVisitor<R, C> {
 
     /**

@@ -24,6 +24,8 @@ package dev.orne.qdsl;
 
 import javax.validation.constraints.NotNull;
 
+import org.apiguardian.api.API;
+
 import com.querydsl.core.support.ReplaceVisitor;
 import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.FactoryExpression;
@@ -44,6 +46,7 @@ import com.querydsl.core.types.TemplateExpression;
  * @version 1.0, 2022-09
  * @since 0.1
  */
+@API(status=API.Status.EXPERIMENTAL, since="0.1")
 public final class NopReplaceVisitor
 extends ReplaceVisitor<Void> {
 

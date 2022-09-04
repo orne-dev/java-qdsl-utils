@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apiguardian.api.API;
 
 import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
@@ -50,6 +51,7 @@ import com.querydsl.core.types.Visitor;
  * @version 1.0, 2021-12
  * @since 0.1
  */
+@API(status=API.Status.EXPERIMENTAL, since="0.1")
 public class ChainedReplaceVisitor
 implements Visitor<Expression<?>, Void> {
 

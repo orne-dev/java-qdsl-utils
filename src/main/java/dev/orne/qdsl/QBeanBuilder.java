@@ -30,6 +30,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.Builder;
+import org.apiguardian.api.API;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
@@ -48,6 +49,7 @@ import com.querydsl.core.types.QBean;
  * @see QBean
  * @see Projections
  */
+@API(status=API.Status.EXPERIMENTAL, since="0.1")
 public class QBeanBuilder<T>
 implements Builder<QBean<T>> {
 
