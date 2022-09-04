@@ -5,6 +5,7 @@
 01. :wrench: Added `commons-beanutils:commons-beanutils:1.9.4` optional dependency.
 01. :gift: Added utility classes.
     01. Added `dev.orne.qdsl.ChainedReplaceVisitor` class.
+    01. Added `dev.orne.qdsl.NopReplaceVisitor` class.
     01. Added `dev.orne.qdsl.OrderSpecifierVisitor` interface.
     01. Added `dev.orne.qdsl.OrderSpecifierReplaceVisitor` interface.
     01. Added `dev.orne.qdsl.QBeanBuilder` class.
