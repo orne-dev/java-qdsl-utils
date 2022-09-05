@@ -47,16 +47,16 @@ import com.querydsl.core.types.TemplateExpression;
  * @since 0.1
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
-public final class NopReplaceVisitor
+public class NopReplaceVisitor
 extends ReplaceVisitor<Void> {
 
     /** The shared instance. */
     public static final NopReplaceVisitor INSTANCE = new NopReplaceVisitor();
 
     /**
-     * Private constructor. Only one shared instance.
+     * Protected constructor for extending classes.
      */
-    private NopReplaceVisitor() {
+    protected NopReplaceVisitor() {
         super();
     }
 
