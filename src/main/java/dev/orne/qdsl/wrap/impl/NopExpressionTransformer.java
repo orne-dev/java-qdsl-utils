@@ -28,6 +28,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 
+import dev.orne.qdsl.NopReplaceVisitor;
 import dev.orne.qdsl.wrap.StoredValues;
 
 /**
@@ -39,6 +40,7 @@ import dev.orne.qdsl.wrap.StoredValues;
  * @since 0.1
  */
 public class NopExpressionTransformer
+extends NopReplaceVisitor
 implements ExpressionTransformer {
 
     /**

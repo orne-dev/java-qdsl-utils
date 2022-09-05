@@ -29,6 +29,7 @@ import org.apiguardian.api.API;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Visitor;
 
 import dev.orne.qdsl.wrap.StoredValues;
 
@@ -42,7 +43,8 @@ import dev.orne.qdsl.wrap.StoredValues;
  * @since 0.1
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
-public interface ExpressionTransformer {
+public interface ExpressionTransformer
+extends Visitor<Expression<?>, Void> {
 
     /** Shared instance of no operation translator. */
     public static final ExpressionTransformer NOP = new NopExpressionTransformer();
