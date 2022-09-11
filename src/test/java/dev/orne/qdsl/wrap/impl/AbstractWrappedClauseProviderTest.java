@@ -429,7 +429,7 @@ class AbstractWrappedClauseProviderTest {
             provider.insert(null);
         });
         assertThrows(EntityPathNotSupportedException.class, () -> {
-            provider.insert(QEntity2.base);
+            provider.insert(new QEntity2("unsupported"));
         });
         final InsertClause<?> delegated = mock(InsertClause.class);
         final ExpressionTransformer transformer = mock(ExpressionTransformer.class);
@@ -456,7 +456,7 @@ class AbstractWrappedClauseProviderTest {
             provider.update(null);
         });
         assertThrows(EntityPathNotSupportedException.class, () -> {
-            provider.update(QEntity2.base);
+            provider.update(new QEntity2("unsupported"));
         });
         final UpdateClause<?> delegated = mock(UpdateClause.class);
         final ExpressionTransformer transformer = mock(ExpressionTransformer.class);
@@ -483,7 +483,7 @@ class AbstractWrappedClauseProviderTest {
             provider.delete(null);
         });
         assertThrows(EntityPathNotSupportedException.class, () -> {
-            provider.delete(QEntity2.base);
+            provider.delete(new QEntity2("unsupported"));
         });
         final DeleteClause<?> delegated = mock(DeleteClause.class);
         final ExpressionTransformer transformer = mock(ExpressionTransformer.class);

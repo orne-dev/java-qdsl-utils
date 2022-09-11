@@ -114,6 +114,14 @@ implements WrappedClauseProvider {
         return Collections.unmodifiableSet(this.supportedEntityTypes);
     }
 
+    /**
+     * Returns the base (unaliases) entity used in the expression transformer
+     * and projections.
+     * 
+     * @param <T> The type of entity
+     * @param entityType The type of entity
+     * @return The base entity
+     */
     protected abstract <T extends EntityPath<?>> T getBaseEntity(
             @NotNull Class<T> entityType);
 
@@ -246,6 +254,13 @@ implements WrappedClauseProvider {
         return result;
     }
 
+    /**
+     * Creates an expression transformer to apply to expressions passed to the
+     * a wrapped clause over the specified entity.
+     * 
+     * @param entity The clause entity, potentially aliased
+     * @return The expression transformer to apply
+     */
     protected @NotNull ExpressionTransformer createTransformerForAlias(
             final @NotNull EntityPath<?> entity) {
         final EntityPath<?> base = getBaseEntity(entity.getClass());
