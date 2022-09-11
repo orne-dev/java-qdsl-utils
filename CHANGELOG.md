@@ -51,6 +51,7 @@
         01. Added `dev.orne.qdsl.wrap.impl.WrappedDeleteClause` class.
         01. Added `dev.orne.qdsl.wrap.impl.AbstractWrappedClauseProvider` class.
         01. Added `dev.orne.qdsl.wrap.impl.AbstractWrappedJpaClauseProvider` class.
+        01. Added `dev.orne.qdsl.wrap.impl.AbstractWrappedSqlClauseProvider` class.
         01. Added `dev.orne.qdsl.wrap.impl.AbstractWrappedClauseProviderRegistry` class.
         01. Added `dev.orne.qdsl.wrap.impl.DefaultWrappedClauseProviderRegistry` class.
         01. Added `dev.orne.qdsl.wrap.impl.CacheableWrappedClauseProviderRegistry` class.
