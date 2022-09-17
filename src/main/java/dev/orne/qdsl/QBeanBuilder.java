@@ -78,7 +78,7 @@ implements Builder<QBean<T>> {
      * Allows writing
      * <code>QBeanBuilder.of(Type.class).build()</code>
      * instead of
-     * <code>new QBeanBuilder{@literal <}Type{@literal >}(Type.class).build()</code>
+     * <code>new QBeanBuilder{@literal <}{@literal >}(Type.class).build()</code>
      * .
      * 
      * @param <T> The bean type

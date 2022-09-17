@@ -13,6 +13,10 @@
     01. Added public API.
         01. Added `dev.orne.qdsl.wrap.ProjectionType` interface.
             01. Added `dev.orne.qdsl.wrap.ProjectionType.Basic` enumeration.
+        01. Added `dev.orne.qdsl.wrap.ReferenceProjection` interface.
+        01. Added `dev.orne.qdsl.wrap.ReferenceProjectionVisitor` interface.
+        01. Added `dev.orne.qdsl.wrap.ReferenceProjectionReplaceVisitor` interface.
+        01. Added `dev.orne.qdsl.wrap.ReferenceProjectionImpl` class.
         01. Added `dev.orne.qdsl.wrap.ExtendedQueryClause` interface.
         01. Added `dev.orne.qdsl.wrap.ExtendedGroupableQueryClause` interface.
         01. Added `dev.orne.qdsl.wrap.StoredValue` class.
