@@ -27,10 +27,11 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.apiguardian.api.API;
 
-import com.querydsl.core.support.ReplaceVisitor;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+
+import dev.orne.qdsl.wrap.impl.transform.BaseExpressionTransformer;
 
 /**
  * Visitor that replaces appearances of the source entity path with of
@@ -43,7 +44,7 @@ import com.querydsl.core.types.Path;
  */
 @API(status=API.Status.EXPERIMENTAL, since="0.1")
 public class EntityAliasReplacer
-extends ReplaceVisitor<Void> {
+extends BaseExpressionTransformer<Void> {
 
     /** The source entity path. */
     private final @NotNull EntityPath<?> source;
