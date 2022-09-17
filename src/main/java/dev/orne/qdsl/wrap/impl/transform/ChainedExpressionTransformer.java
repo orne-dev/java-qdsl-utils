@@ -37,6 +37,8 @@ import com.querydsl.core.types.Visitor;
 
 import dev.orne.qdsl.ChainedReplaceVisitor;
 import dev.orne.qdsl.OrderSpecifierReplaceVisitor;
+import dev.orne.qdsl.wrap.ReferenceProjection;
+import dev.orne.qdsl.wrap.ReferenceProjectionReplaceVisitor;
 import dev.orne.qdsl.wrap.StoredValues;
 import dev.orne.qdsl.wrap.StoredValuesReplaceVisitor;
 import dev.orne.qdsl.wrap.impl.ExpressionTransformationException;
@@ -52,6 +54,7 @@ import dev.orne.qdsl.wrap.impl.ExpressionTransformer;
 public class ChainedExpressionTransformer
 extends ChainedReplaceVisitor
 implements ExpressionTransformer,
+        ReferenceProjectionReplaceVisitor<Void>,
         OrderSpecifierReplaceVisitor<Void>,
         StoredValuesReplaceVisitor<Void> {
 
@@ -74,6 +77,20 @@ implements ExpressionTransformer,
     public ChainedExpressionTransformer(
             final Collection<Visitor<Expression<?>, ?>> visitors) {
         super(visitors);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Expression<?> visit(
+            final @NotNull ReferenceProjection<?, ?> value,
+            final Void context) {
+        Expression<?> result = value;
+        for (final Visitor<Expression<?>, ?> visitor : getVisitors()) {
+            result = result.accept(visitor, null);
+        }
+        return result;
     }
 
     /**

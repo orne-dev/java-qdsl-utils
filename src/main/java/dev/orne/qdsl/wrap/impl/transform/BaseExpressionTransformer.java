@@ -41,6 +41,7 @@ import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.SubQueryExpressionImpl;
 
 import dev.orne.qdsl.OrderSpecifierReplaceVisitor;
+import dev.orne.qdsl.wrap.ReferenceProjectionReplaceVisitor;
 import dev.orne.qdsl.wrap.StoredValues;
 import dev.orne.qdsl.wrap.StoredValuesReplaceVisitor;
 
@@ -54,7 +55,8 @@ import dev.orne.qdsl.wrap.StoredValuesReplaceVisitor;
  */
 public class BaseExpressionTransformer<C>
 extends ReplaceVisitor<C>
-implements OrderSpecifierReplaceVisitor<C>,
+implements ReferenceProjectionReplaceVisitor<C>,
+        OrderSpecifierReplaceVisitor<C>,
         StoredValuesReplaceVisitor<C> {
 
     /**

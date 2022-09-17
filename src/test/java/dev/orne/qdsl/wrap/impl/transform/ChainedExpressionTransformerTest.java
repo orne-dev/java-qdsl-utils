@@ -24,6 +24,7 @@ package dev.orne.qdsl.wrap.impl.transform;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Visitor;
 
 import dev.orne.qdsl.TestTypes;
+import dev.orne.qdsl.wrap.ReferenceProjection;
 import dev.orne.qdsl.wrap.StoredValue;
 import dev.orne.qdsl.wrap.StoredValues;
 import dev.orne.qdsl.wrap.impl.ExpressionTransformationException;
@@ -119,6 +121,24 @@ class ChainedExpressionTransformerTest {
         assertEquals(2, result.getVisitors().size());
         assertSame(VISITOR_A, result.getVisitors().get(0));
         assertSame(VISITOR_B, result.getVisitors().get(1));
+    }
+
+    /**
+     * Unit test for {@link ChainedExpressionTransformer#visit(ReferenceProjection, Void)}.
+     */
+    @Test
+    void testVisitReferenceProjection() {
+        final ChainedExpressionTransformer translator = new ChainedExpressionTransformer(
+                VISITOR_A, VISITOR_B);
+        final ReferenceProjection<?, ?> initial = mock(ReferenceProjection.class);
+        final Expression<?> partialResultA = mock(Expression.class);
+        final Expression<?> partialResultB = mock(Expression.class);
+        willReturn(partialResultA).given(initial).accept(VISITOR_A, null);
+        willReturn(partialResultB).given(partialResultA).accept(VISITOR_B, null);
+        final Expression<?> result = translator.visit(initial, null);
+        assertSame(partialResultB, result);
+        then(initial).should().accept(VISITOR_A, null);
+        then(partialResultA).should().accept(VISITOR_B, null);
     }
 
     /**

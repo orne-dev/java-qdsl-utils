@@ -25,6 +25,8 @@ package dev.orne.qdsl.wrap.impl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.Collections;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 
+import dev.orne.qdsl.wrap.ReferenceProjection;
 import dev.orne.qdsl.wrap.StoredValues;
 
 /**
@@ -62,6 +65,39 @@ class NopExpressionTransformerTest {
     @Test
     void testConstructor() {
         assertDoesNotThrow(NopExpressionTransformer::new);
+    }
+
+    /**
+     * Unit test for {@link NopExpressionTransformer#visit(ReferenceProjection, Void)}.
+     */
+    @Test
+    void testVisitReferenceProjection() {
+        final ReferenceProjection<?, ?> expr = mock(ReferenceProjection.class);
+        final NopExpressionTransformer visitor = new NopExpressionTransformer();
+        assertSame(expr, visitor.visit(expr, null));
+        then(expr).shouldHaveNoInteractions();
+    }
+
+    /**
+     * Unit test for {@link NopExpressionTransformer#visit(OrderSpecifier, Void)}.
+     */
+    @Test
+    void testVisitOrderSpecifier() {
+        final OrderSpecifier<?> expr = mock(OrderSpecifier.class);
+        final NopExpressionTransformer visitor = new NopExpressionTransformer();
+        assertEquals(Collections.singletonList(expr), visitor.visit(expr, null));
+        then(expr).shouldHaveNoInteractions();
+    }
+
+    /**
+     * Unit test for {@link NopExpressionTransformer#visit(StoredValues, Void)}.
+     */
+    @Test
+    void testVisitStoredValues() {
+        final StoredValues expr = mock(StoredValues.class);
+        final NopExpressionTransformer visitor = new NopExpressionTransformer();
+        assertSame(expr, visitor.visit(expr, null));
+        then(expr).shouldHaveNoInteractions();
     }
 
     /**

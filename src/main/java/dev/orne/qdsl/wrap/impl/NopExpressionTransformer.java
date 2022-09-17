@@ -1,5 +1,8 @@
 package dev.orne.qdsl.wrap.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 /*-
  * #%L
  * Orne Querydsl Utils
@@ -29,7 +32,11 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 
 import dev.orne.qdsl.NopReplaceVisitor;
+import dev.orne.qdsl.OrderSpecifierReplaceVisitor;
+import dev.orne.qdsl.wrap.ReferenceProjection;
+import dev.orne.qdsl.wrap.ReferenceProjectionReplaceVisitor;
 import dev.orne.qdsl.wrap.StoredValues;
+import dev.orne.qdsl.wrap.StoredValuesReplaceVisitor;
 
 /**
  * No operation implementation of {@code Translator}.
@@ -41,7 +48,40 @@ import dev.orne.qdsl.wrap.StoredValues;
  */
 public class NopExpressionTransformer
 extends NopReplaceVisitor
-implements ExpressionTransformer {
+implements ExpressionTransformer,
+        ReferenceProjectionReplaceVisitor<Void>,
+        OrderSpecifierReplaceVisitor<Void>,
+        StoredValuesReplaceVisitor<Void> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull Expression<?> visit(
+            final @NotNull ReferenceProjection<?, ?> value,
+            final Void context) {
+        return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull List<OrderSpecifier<?>> visit(
+            final @NotNull OrderSpecifier<?> expr,
+            final Void context) {
+        return Collections.singletonList(expr);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull StoredValues visit(
+            final @NotNull StoredValues expr,
+            final Void context) {
+        return expr;
+    }
 
     /**
      * {@inheritDoc}
