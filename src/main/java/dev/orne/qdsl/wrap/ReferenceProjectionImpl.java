@@ -146,7 +146,7 @@ implements ReferenceProjection<T, I> {
      * {@inheritDoc}
      */
     @Override
-    public Expression<T> getProjection() {
+    public @NotNull Expression<T> getProjection() {
         return this.projection;
     }
 
@@ -154,7 +154,7 @@ implements ReferenceProjection<T, I> {
      * {@inheritDoc}
      */
     @Override
-    public Class<? extends T> getType() {
+    public @NotNull Class<? extends T> getType() {
         return this.projection.getType();
     }
 
@@ -164,6 +164,14 @@ implements ReferenceProjection<T, I> {
     @Override
     public @NotNull Expression<I> getReference() {
         return this.reference;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public @NotNull Class<? extends I> getReferenceType() {
+        return this.reference.getType();
     }
 
     /**

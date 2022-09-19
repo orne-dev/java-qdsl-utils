@@ -75,6 +75,21 @@ class ReferenceProjectionImplTest {
     }
 
     /**
+     * Test for {@link ReferenceProjectionImpl#getReferenceType()}.
+     */
+    @Test
+    void testGetReferenceType() {
+        final Expression<?> projection = mock(Expression.class);
+        final Expression<?> reference = mock(Expression.class);
+        final ReferenceProjectionImpl<?, ?> instance = new ReferenceProjectionImpl<>(projection, reference);
+        willReturn(MyType.class).given(reference).getType();
+        assertSame(MyType.class, instance.getReferenceType());
+        then(projection).shouldHaveNoInteractions();
+        then(reference).should().getType();
+        then(reference).shouldHaveNoMoreInteractions();
+    }
+
+    /**
      * Test for {@link ReferenceProjectionImpl#of(Expression)}.
      */
     @Test

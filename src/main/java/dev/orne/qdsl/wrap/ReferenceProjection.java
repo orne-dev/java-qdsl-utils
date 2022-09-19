@@ -57,6 +57,13 @@ extends Expression<T>, ProjectionRole<T> {
     @NotNull Expression<I> getReference();
 
     /**
+     * Returns the reference type.
+     * 
+     * @return The reference type
+     */
+    @NotNull Class<? extends I> getReferenceType();
+
+    /**
      * {@inheritDoc}
      */
     @Override
