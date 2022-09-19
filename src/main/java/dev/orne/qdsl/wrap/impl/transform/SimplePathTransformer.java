@@ -50,7 +50,7 @@ extends BaseExpressionTransformer<Void> {
     /** The target expression. */
     private final @NotNull Expression<S> target;
     /** The value assignment translator. */
-    private final @NotNull StoredValuesTransformer assignmentTranslator;
+    private final StoredValuesTransformer assignmentTranslator;
 
     /**
      * Creates a new instance.
@@ -62,7 +62,7 @@ extends BaseExpressionTransformer<Void> {
     protected SimplePathTransformer(
             final @NotNull Path<S> source,
             final @NotNull Expression<S> target,
-            final @NotNull StoredValuesTransformer assignmentTranslator) {
+            final StoredValuesTransformer assignmentTranslator) {
         super();
         this.source = Validate.notNull(source);
         this.target = Validate.notNull(target);
@@ -118,7 +118,7 @@ extends BaseExpressionTransformer<Void> {
      * 
      * @return The value assignment translator
      */
-    public @NotNull StoredValuesTransformer getAssignmentTranslator() {
+    public StoredValuesTransformer getAssignmentTranslator() {
         return this.assignmentTranslator;
     }
 
@@ -144,6 +144,11 @@ extends BaseExpressionTransformer<Void> {
             final @NotNull StoredValues expr,
             final Void context) {
         if (expr.contains(this.source)) {
+            if (this.assignmentTranslator == null) {
+                throw new UnsupportedOperationException(String.format(
+                        "Assignments to path %s are not allowed",
+                        this.source));
+            }
             this.assignmentTranslator.visit(expr, null);
         }
         return expr;
@@ -185,7 +190,7 @@ extends BaseExpressionTransformer<Void> {
          * @param target The target path
          * @return The next step builder
          */
-        @NotNull FinalBuilder<S> toPath(
+        @NotNull PathFinalBuilder<S> toPath(
                 @NotNull Path<S> target);
     }
 
@@ -219,6 +224,13 @@ extends BaseExpressionTransformer<Void> {
          */
         @NotNull FinalBuilder<S> storingWith(
                 @NotNull StoredValuesTransformer translator);
+
+        /**
+         * Disallows thw storage of values to the path.
+         * 
+         * @return The next step builder
+         */
+        @NotNull FinalBuilder<S> withDisallowedStorage();
     }
 
     /**
@@ -240,6 +252,25 @@ extends BaseExpressionTransformer<Void> {
     }
 
     /**
+     * Terminal builder for single path translators.
+     * 
+     * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
+     * @version 1.0, 2021-10
+     * @param <S> The source path type
+     * @since 0.1
+     */
+    public static interface PathFinalBuilder<S>
+    extends FinalBuilder<S> {
+
+        /**
+         * Disallows thw storage of values to the path.
+         * 
+         * @return The next step builder
+         */
+        @NotNull FinalBuilder<S> withDisallowedStorage();
+    }
+
+    /**
      * Internal implementation of builder interfaces.
      * 
      * @author <a href="mailto:wamphiry@orne.dev">(w) Iker Hernaez</a>
@@ -248,7 +279,7 @@ extends BaseExpressionTransformer<Void> {
      * @since 0.1
      */
     protected static class Builder<S>
-    implements TargetBuilder<S>, StoreBuilder<S>, FinalBuilder<S> {
+    implements TargetBuilder<S>, StoreBuilder<S>, PathFinalBuilder<S> {
 
         /** The source path. */
         private final @NotNull Path<S> source;
@@ -311,7 +342,7 @@ extends BaseExpressionTransformer<Void> {
          * @param translator The value assignment translator
          */
         protected void setAssignmentTranslator(
-                final @NotNull StoredValuesTransformer translator) {
+                final StoredValuesTransformer translator) {
             this.assignmentTranslator = translator;
         }
 
@@ -354,6 +385,15 @@ extends BaseExpressionTransformer<Void> {
         public @NotNull Builder<S> storingWith(
                 final @NotNull StoredValuesTransformer translator) {
             setAssignmentTranslator(translator);
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public @NotNull Builder<S> withDisallowedStorage() {
+            setAssignmentTranslator(null);
             return this;
         }
 

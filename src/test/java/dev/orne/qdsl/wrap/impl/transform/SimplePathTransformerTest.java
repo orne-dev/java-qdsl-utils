@@ -122,6 +122,18 @@ class SimplePathTransformerTest {
     }
 
     @Test
+    void testBuilderToPathWithDisallowedStorage() {
+        final SimplePathTransformer<String> result = SimplePathTransformer
+                .fromPath(PROPERTY_A_PATH)
+                .toPath(PROPERTY_B_PATH)
+                .withDisallowedStorage()
+                .build();
+        assertSame(PROPERTY_A_PATH, result.getSource());
+        assertSame(PROPERTY_B_PATH, result.getTarget());
+        assertNull(result.getAssignmentTranslator());
+    }
+
+    @Test
     void testBuilderToExpressionWithCustomExpressionTranslator() {
         final SimplePathTransformer<String> result = SimplePathTransformer
                 .fromPath(PROPERTY_A_PATH)
@@ -153,6 +165,18 @@ class SimplePathTransformerTest {
         assertSame(PROPERTY_A_PATH, result.getSource());
         assertSame(EXPR, result.getTarget());
         assertSame(ASSIGN_TR, result.getAssignmentTranslator());
+    }
+
+    @Test
+    void testBuilderToExpressionWithDisallowedStorage() {
+        final SimplePathTransformer<String> result =
+                SimplePathTransformer.fromPath(PROPERTY_A_PATH)
+                .toExpression(EXPR)
+                .withDisallowedStorage()
+                .build();
+        assertSame(PROPERTY_A_PATH, result.getSource());
+        assertSame(EXPR, result.getTarget());
+        assertNull(result.getAssignmentTranslator());
     }
 
     @Test
@@ -189,6 +213,20 @@ class SimplePathTransformerTest {
         final StoredValues result = translator.visit(values, null);
         assertSame(values, result);
         then(ASSIGN_TR).should().visit(values, null);
+    }
+
+    @Test
+    void testVisitSourceAssignmentWithDisallowedStorage() {
+        final SimplePathTransformer<String> translator = SimplePathTransformer
+                .fromPath(PROPERTY_A_PATH)
+                .toExpression(EXPR)
+                .withDisallowedStorage()
+                .build();
+        final StoredValues values = spy(StoredValues.with(
+                StoredValue.of(PROPERTY_A_PATH, EXPR)));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            translator.visit(values, null);
+        });
     }
 
     @Test
