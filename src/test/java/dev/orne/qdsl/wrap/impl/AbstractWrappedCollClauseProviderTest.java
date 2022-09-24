@@ -30,9 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -71,63 +69,81 @@ import dev.orne.qdsl.wrap.ExtendedQueryClause;
 class AbstractWrappedCollClauseProviderTest {
 
     /**
-     * Unit test for {@link AbstractWrappedCollClauseProvider#AbstractWrappedCollectionClauseProvider(Class...)}.
+     * Unit test for {@link AbstractWrappedCollClauseProvider#AbstractWrappedCollClauseProvider(EntityPath, EntityPath...)}.
      */
     @Test
     void testVarargsConstructor() {
         assertThrows(NullPointerException.class, () -> {
-            new TestProvider((Class<? extends EntityPath<?>>[]) null);
+            new TestProvider(null, QEntity2.base);
+        });
+        assertThrows(NullPointerException.class, () -> {
+            new TestProvider(QTargetEntity.base, (EntityPath<?>[]) null);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(QEntity.class, null, QEntity2.class);
+            new TestProvider(QTargetEntity.base, QEntity.base, null, QEntity2.base);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider();
+            new TestProvider(QTargetEntity.base);
         });
-        AbstractWrappedCollClauseProvider result = new TestProvider(QEntity.class);
-        assertNotNull(result.getSupportedEntityTypes());
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(1, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
+        AbstractWrappedClauseProvider result = new TestProvider(QTargetEntity.base, QEntity.base);
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertNotNull(result.getBaseEntities());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(1, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
-        result = new TestProvider(QEntity.class, QEntity2.class);
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(2, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity2.class));
+        result = new TestProvider(QTargetEntity.base, QEntity.base, QEntity2.base);
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(2, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
+        assertTrue(result.getBaseEntities().containsKey(QEntity2.class));
+        assertSame(QEntity2.base, result.getBaseEntities().get(QEntity2.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
     }
 
     /**
-     * Unit test for {@link AbstractWrappedCollClauseProvider#AbstractWrappedCollectionClauseProvider(Set)}.
+     * Unit test for {@link AbstractWrappedCollClauseProvider#AbstractWrappedCollClauseProvider(EntityPath, Collection)}.
      */
     @Test
-    void testSetConstructor() {
+    void testCollectionConstructor() {
         assertThrows(NullPointerException.class, () -> {
-            new TestProvider((Set<Class<? extends EntityPath<?>>>) null);
+            new TestProvider(null, Arrays.asList(QEntity.base));
+        });
+        assertThrows(NullPointerException.class, () -> {
+            new TestProvider(QTargetEntity.base, (Collection<EntityPath<?>>) null);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(new HashSet<>(Arrays.asList(QEntity.class, null, QEntity2.class)));
+            new TestProvider(QTargetEntity.base, Arrays.asList(QEntity.base, null, QEntity2.base));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(Collections.emptySet());
+            new TestProvider(QTargetEntity.base, Collections.emptyList());
         });
-        AbstractWrappedCollClauseProvider result = new TestProvider(
-                new HashSet<>(Arrays.asList(QEntity.class)));
-        assertNotNull(result.getSupportedEntityTypes());
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(1, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
+        AbstractWrappedClauseProvider result = new TestProvider(
+                QTargetEntity.base,
+                Arrays.asList(QEntity.base));
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertNotNull(result.getBaseEntities());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(1, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
         result = new TestProvider(
-                new HashSet<>(Arrays.asList(QEntity.class, QEntity2.class)));
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(2, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity2.class));
+                QTargetEntity.base,
+                Arrays.asList(QEntity.base, QEntity2.base));
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(2, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
+        assertTrue(result.getBaseEntities().containsKey(QEntity2.class));
+        assertSame(QEntity2.base, result.getBaseEntities().get(QEntity2.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
     }
@@ -137,7 +153,7 @@ class AbstractWrappedCollClauseProviderTest {
      */
     @Test
     void testGetQueryEngine() {
-        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final QueryEngine result = provider.getQueryEngine();
         assertSame(DefaultQueryEngine.getDefault(), result);
     }
@@ -147,7 +163,7 @@ class AbstractWrappedCollClauseProviderTest {
      */
     @Test
     void testQuery() {
-        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         assertThrows(NullPointerException.class, () -> {
             provider.query(null);
         });
@@ -156,6 +172,7 @@ class AbstractWrappedCollClauseProviderTest {
         });
         final ExpressionTransformer transformer = mock(ExpressionTransformer.class);
         final QEntity alias = new QEntity("alias");
+        final QTargetEntity source = new QTargetEntity("alias");
         final QueryEngine engine = mock(QueryEngine.class);
         final Collection<BeanType> values = spy(new ArrayList<>());
         willReturn(engine).given(provider).getQueryEngine();
@@ -165,7 +182,7 @@ class AbstractWrappedCollClauseProviderTest {
         final WrappedCollQueryClause<?> wresult = assertInstanceOf(WrappedCollQueryClause.class, result);
         final CollQuery<?> delegated = assertInstanceOf(CollQuery.class, wresult.getDelegate());
         assertSame(transformer, wresult.getTransformer());
-        verifyQuery(delegated, engine, alias, values);
+        verifyQuery(delegated, engine, source, values);
         then(provider).should().getQueryEngine();
         then(provider).should().getValues(alias);
         then(provider).should().createTransformerForAlias(alias);
@@ -180,7 +197,7 @@ class AbstractWrappedCollClauseProviderTest {
      */
     @Test
     void testCreateDelegatedInsertClause() {
-        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final QEntity alias = new QEntity("alias");
         assertThrows(UnsupportedOperationException.class, () -> {
             provider.createDelegatedInsertClause(alias);
@@ -192,7 +209,7 @@ class AbstractWrappedCollClauseProviderTest {
      */
     @Test
     void testCreateDelegatedUpdateClause() throws IllegalAccessException {
-        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final QEntity alias = new QEntity("alias");
         final QueryEngine engine = mock(QueryEngine.class);
         @SuppressWarnings("unchecked")
@@ -215,7 +232,7 @@ class AbstractWrappedCollClauseProviderTest {
      */
     @Test
     void testCreateDelegatedDeleteClause() {
-        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedCollClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final QEntity alias = new QEntity("alias");
         final QueryEngine engine = mock(QueryEngine.class);
         @SuppressWarnings("unchecked")
@@ -271,7 +288,8 @@ class AbstractWrappedCollClauseProviderTest {
             throw err;
         }
         assertNotNull(metadata);
-        assertSame(entity, metadata.getProjection());
+        assertEquals(entity.getClass(), metadata.getProjection().getClass());
+        assertEquals(entity, metadata.getProjection());
         assertEquals(1, metadata.getJoins().size());
         assertEquals(entity, metadata.getJoins().get(0).getTarget());
         assertEquals(JoinType.DEFAULT, metadata.getJoins().get(0).getType());
@@ -289,16 +307,11 @@ class AbstractWrappedCollClauseProviderTest {
 
     private static class TestProvider
     extends AbstractWrappedCollClauseProvider {
-        @SafeVarargs
-        public TestProvider(@NotNull Class<? extends EntityPath<?>>... supportedEntityTypes) {
-            super(supportedEntityTypes);
+        public TestProvider(@NotNull EntityPath<?> targetEntity, @NotNull EntityPath<?>... supportedEntities) {
+            super(targetEntity, supportedEntities);
         }
-        public TestProvider(@NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes) {
-            super(supportedEntityTypes);
-        }
-        @Override
-        protected <T extends EntityPath<?>> T getBaseEntity(@NotNull Class<T> entityType) {
-            throw new AssertionError("Method call not mocked");
+        public TestProvider(@NotNull EntityPath<?> targetEntity, @NotNull Collection<EntityPath<?>> supportedEntities) {
+            super(targetEntity, supportedEntities);
         }
         @Override
         protected <T> Collection<T> getValues(@NotNull EntityPath<T> entity) {
@@ -312,6 +325,7 @@ class AbstractWrappedCollClauseProviderTest {
     private static interface BeanType {}
     private static class QEntity extends EntityPathBase<BeanType> {
         private static final long serialVersionUID = 1L;
+        public static final QEntity base = new QEntity("base");
         public QEntity(String variable) {
             super(BeanType.class, PathMetadataFactory.forVariable(variable));
         }
@@ -324,6 +338,7 @@ class AbstractWrappedCollClauseProviderTest {
     }
     private static class QEntity2 extends EntityPathBase<BeanType> {
         private static final long serialVersionUID = 1L;
+        public static final QEntity2 base = new QEntity2("base");
         public QEntity2(String variable) {
             super(BeanType.class, PathMetadataFactory.forVariable(variable));
         }
@@ -331,6 +346,19 @@ class AbstractWrappedCollClauseProviderTest {
             super(path.getType(), path.getMetadata());
         }
         public QEntity2(PathMetadata metadata) {
+            super(BeanType.class, metadata);
+        }
+    }
+    public static class QTargetEntity extends EntityPathBase<BeanType> {
+        private static final long serialVersionUID = 1L;
+        public static final QTargetEntity base = new QTargetEntity("base");
+        public QTargetEntity(String variable) {
+            super(BeanType.class, PathMetadataFactory.forVariable(variable));
+        }
+        public QTargetEntity(Path<? extends BeanType> path) {
+            super(path.getType(), path.getMetadata());
+        }
+        public QTargetEntity(PathMetadata metadata) {
             super(BeanType.class, metadata);
         }
     }

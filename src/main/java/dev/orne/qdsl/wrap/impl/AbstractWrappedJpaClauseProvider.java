@@ -22,7 +22,7 @@ package dev.orne.qdsl.wrap.impl;
  * #L%
  */
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.validation.constraints.NotNull;
 
@@ -60,22 +60,26 @@ extends AbstractWrappedClauseProvider {
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     @SafeVarargs
     protected AbstractWrappedJpaClauseProvider(
-            final @NotNull Class<? extends EntityPath<?>>... supportedEntityTypes) {
-        super(supportedEntityTypes);
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull EntityPath<?>... supportedEntities) {
+        super(targetEntity, supportedEntities);
     }
 
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     protected AbstractWrappedJpaClauseProvider(
-            final @NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes) {
-        super(supportedEntityTypes);
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull Collection<EntityPath<?>> supportedEntities) {
+        super(targetEntity, supportedEntities);
     }
 
     /**
@@ -84,17 +88,6 @@ extends AbstractWrappedClauseProvider {
      * @return The JPA query factory
      */
     protected abstract @NotNull JPQLQueryFactory getQueryFactory();
-
-    /**
-     * Returns the real target entity path for the specified entity path.
-     * <p>
-     * Passed to the delegated JPA query clause {@code from()} method.
-     * 
-     * @param entity The target entity path
-     * @return The target relational entity path
-     */
-    protected abstract @NotNull EntityPath<?> getSource(
-            final @NotNull EntityPath<?> entity);
 
     /**
      * Implementation of {@code WrappedGroupableQueryClauseProvider.query()}.
@@ -125,7 +118,7 @@ extends AbstractWrappedClauseProvider {
      */
     protected <T> @NotNull JPQLQuery<?> createDelegatedQueryClause(
             final @NotNull EntityPath<T> entity) {
-        return getQueryFactory().from(getSource(entity));
+        return getQueryFactory().from(getTargetEntity(entity));
     }
 
     /**
@@ -134,7 +127,7 @@ extends AbstractWrappedClauseProvider {
     @Override
     protected <T> @NotNull InsertClause<?> createDelegatedInsertClause(
             final @NotNull EntityPath<T> entity) {
-        return getQueryFactory().insert(getSource(entity));
+        return getQueryFactory().insert(getTargetEntity(entity));
     }
 
     /**
@@ -143,7 +136,7 @@ extends AbstractWrappedClauseProvider {
     @Override
     protected <T> @NotNull UpdateClause<?> createDelegatedUpdateClause(
             final @NotNull EntityPath<T> entity) {
-        return getQueryFactory().update(getSource(entity));
+        return getQueryFactory().update(getTargetEntity(entity));
     }
 
     /**
@@ -152,6 +145,6 @@ extends AbstractWrappedClauseProvider {
     @Override
     protected <T> @NotNull DeleteClause<?> createDelegatedDeleteClause(
             final @NotNull EntityPath<T> entity) {
-        return getQueryFactory().delete(getSource(entity));
+        return getQueryFactory().delete(getTargetEntity(entity));
     }
 }

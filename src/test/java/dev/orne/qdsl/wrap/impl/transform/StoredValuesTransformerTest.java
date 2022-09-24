@@ -74,6 +74,25 @@ class StoredValuesTransformerTest {
     }
 
     /**
+     * Test for {@link StoredValuesTransformer#transform(Path, SimpleExpressionTransformer)}.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    void transformSimpleTest_Missing() {
+        final Path<TestTypes.SimpleType> path = builder.getSimple("source", TestTypes.SimpleType.class);
+        final Path<TestTypes.SimpleType> path2 = builder.getSimple("other", TestTypes.SimpleType.class);
+        final Expression<TestTypes.SimpleType> oldValue = mock(Expression.class);
+        final SimpleExpressionTransformer<TestTypes.SimpleType, TestTypes.SimpleType> exprTranslator =
+                mock(SimpleExpressionTransformer.class);
+        final StoredValuesTransformer transformer = StoredValuesTransformer.transform(path, exprTranslator);
+        final StoredValues values = StoredValues.with(StoredValue.of(path2, oldValue));
+        transformer.visit(values, null);
+        assertEquals(1, values.size());
+        assertEquals(oldValue, values.get(path2));
+        then(exprTranslator).shouldHaveNoInteractions();
+    }
+
+    /**
      * Test for {@link StoredValuesTransformer#transform(Path, ValueTransformer, SimpleExpressionTransformer)}.
      */
     @Test
@@ -138,6 +157,23 @@ class StoredValuesTransformerTest {
     }
 
     /**
+     * Test for {@link StoredValuesTransformer#move(Path, Path)}.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    void moveTest_Missing() {
+        final Path<TestTypes.SimpleType> source = builder.getSimple("source", TestTypes.SimpleType.class);
+        final Path<TestTypes.SimpleType> other = builder.getSimple("other", TestTypes.SimpleType.class);
+        final Path<TestTypes.SimpleType> target = builder.getSimple("target", TestTypes.SimpleType.class);
+        final Expression<TestTypes.SimpleType> oldValue = mock(Expression.class);
+        final StoredValuesTransformer transformer = StoredValuesTransformer.move(source, target);
+        final StoredValues values = StoredValues.with(StoredValue.of(other, oldValue));
+        transformer.visit(values, null);
+        assertEquals(1, values.size());
+        assertEquals(oldValue, values.get(other));
+    }
+
+    /**
      * Test for {@link StoredValuesTransformer#replace(Path, Path, SimpleExpressionTransformer)}.
      */
     @Test
@@ -157,6 +193,26 @@ class StoredValuesTransformerTest {
         assertEquals(newValue, values.get(target));
         then(valueTranslator).should().apply(oldValue);
         then(valueTranslator).shouldHaveNoMoreInteractions();
+    }
+
+    /**
+     * Test for {@link StoredValuesTransformer#replace(Path, Path, SimpleExpressionTransformer)}.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    void replaceSimpleTest_Missing() {
+        final Path<TestTypes.SimpleType> source = builder.getSimple("source", TestTypes.SimpleType.class);
+        final Path<TestTypes.SimpleType> other = builder.getSimple("other", TestTypes.SimpleType.class);
+        final Path<TestTypes.UnrelatedType> target = builder.getSimple("target", TestTypes.UnrelatedType.class);
+        final Expression<TestTypes.SimpleType> oldValue = mock(Expression.class);
+        final SimpleExpressionTransformer<TestTypes.SimpleType, TestTypes.UnrelatedType> valueTranslator =
+                mock(SimpleExpressionTransformer.class);
+        final StoredValuesTransformer transformer = StoredValuesTransformer.replace(source, target, valueTranslator);
+        final StoredValues values = StoredValues.with(StoredValue.of(other, oldValue));
+        transformer.visit(values, null);
+        assertEquals(1, values.size());
+        assertEquals(oldValue, values.get(other));
+        then(valueTranslator).shouldHaveNoInteractions();
     }
 
     /**

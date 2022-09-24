@@ -23,12 +23,12 @@ package dev.orne.qdsl.wrap.impl;
  */
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apiguardian.api.API;
 
 import com.querydsl.core.dml.DeleteClause;
@@ -75,55 +76,106 @@ import dev.orne.qdsl.wrap.impl.transform.ChainedExpressionTransformer;
 public abstract class AbstractWrappedClauseProvider
 implements WrappedClauseProvider {
 
-    /** The supported entity types. */
-    private final @NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes;
+    /** The base target entity. */
+    private final @NotNull EntityPath<?> targetEntity;
+    /** The base entities. */
+    private final @NotNull Map<Class<? extends EntityPath<?>>, EntityPath<?>> baseEntities;
     /** The registered projections, by entity and type. */
     private final @NotNull Map<ProjectionKey, Expression<?>> projections;
 
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     @SafeVarargs
     protected AbstractWrappedClauseProvider(
-            final @NotNull Class<? extends EntityPath<?>>... supportedEntityTypes) {
-        this(new HashSet<>(Arrays.asList(Validate.notNull(supportedEntityTypes))));
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull EntityPath<?>... supportedEntities) {
+        this(targetEntity, Arrays.asList(Validate.notNull(supportedEntities)));
     }
 
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     protected AbstractWrappedClauseProvider(
-            final @NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes) {
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull Collection<EntityPath<?>> supportedEntities) {
         super();
-        this.supportedEntityTypes = Validate.notNull(supportedEntityTypes);
-        Validate.noNullElements(supportedEntityTypes);
-        Validate.isTrue(!supportedEntityTypes.isEmpty());
+        this.targetEntity =  Validate.notNull(targetEntity);
+        Validate.notNull(supportedEntities);
+        Validate.noNullElements(supportedEntities);
+        Validate.isTrue(!supportedEntities.isEmpty());
+        this.baseEntities = new HashMap<>(supportedEntities.size());
+        for (final EntityPath<?> baseEntity : supportedEntities) {
+            @SuppressWarnings("unchecked")
+            final Class<? extends EntityPath<?>> supportedEntityType =
+                    (Class<? extends EntityPath<?>>) baseEntity.getClass();
+            this.baseEntities.put(supportedEntityType, baseEntity);
+        }
         this.projections = new HashMap<>();
     }
 
     /**
-     * Returns the supported entity types.
+     * Returns the base target entity as returned by the expression
+     * transformer and used in projections.
      * 
-     * @return The supported entity types
+     * @return The base target entity
      */
-    protected @NotNull Set<Class<? extends EntityPath<?>>> getSupportedEntityTypes() {
-        return Collections.unmodifiableSet(this.supportedEntityTypes);
+    protected @NotNull EntityPath<?> getTargetEntity() {
+        return this.targetEntity;
     }
 
     /**
-     * Returns the base (unaliases) entity used in the expression transformer
-     * and projections.
+     * Returns a new target entity with the same variable name as
+     * the entity passed as argument.
+     * <p>
+     * Expects a constructor with a single {@code String} argument.
+     * 
+     * @param alias The desired entity alias
+     * @return The aliased target entity
+     */
+    protected @NotNull EntityPath<?> getTargetEntity(
+            final @NotNull EntityPath<?> alias) {
+        return getTargetEntity(getEntityAlias(alias));
+    }
+
+    /**
+     * Returns a new target entity with the specified variable name.
+     * 
+     * @param alias The desired entity alias
+     * @return The aliased target entity
+     */
+    protected @NotNull EntityPath<?> getTargetEntity(
+            final @NotNull String alias) {
+        return createEntity(this.targetEntity.getClass(), alias);
+    }
+
+    /**
+     * Returns the base (without alias) entities used in the expression transformer.
+     * 
+     * @return The base entities, by type
+     */
+    protected @NotNull Map<Class<? extends EntityPath<?>>, EntityPath<?>> getBaseEntities() {
+        return this.baseEntities;
+    }
+
+    /**
+     * Returns the base (without alias) entity used in the expression transformer.
      * 
      * @param <T> The type of entity
      * @param entityType The type of entity
      * @return The base entity
      */
-    protected abstract <T extends EntityPath<?>> T getBaseEntity(
-            @NotNull Class<T> entityType);
+    protected <T extends EntityPath<?>> @NotNull T getBaseEntity(
+            final @NotNull Class<T> entityType) {
+        validateSupported(entityType);
+        return entityType.cast(this.baseEntities.get(entityType));
+    }
 
     /**
      * Returns the registered projections, by entity and type.
@@ -150,7 +202,7 @@ implements WrappedClauseProvider {
     @Override
     public boolean supports(
             final @NotNull Class<? extends EntityPath<?>> entityType) {
-        return this.supportedEntityTypes.contains(entityType);
+        return this.baseEntities.containsKey(entityType);
     }
 
     /**
@@ -236,7 +288,8 @@ implements WrappedClauseProvider {
      * expressions to be applied to the delegated clauses.
      * <p>
      * This visitor is applied after the expression transformer end to the
-     * projections returned by {@code getProjection()}.
+     * projections returned by {@code getProjection()} and should replace
+     * base target entity with aliased target entity.
      * 
      * @param entity The entity to which alias restore
      * @return The entity alias restorer visitor
@@ -249,7 +302,9 @@ implements WrappedClauseProvider {
                 base.getMetadata().getName())) {
             result = NopReplaceVisitor.INSTANCE;
         } else {
-            result = new EntityAliasReplacer(base, entity);
+            final EntityPath<?> targetBase = getTargetEntity();
+            final EntityPath<?> targetAlias = getTargetEntity(entity);
+            result = new EntityAliasReplacer(targetBase, targetAlias);
         }
         return result;
     }
@@ -387,6 +442,40 @@ implements WrappedClauseProvider {
      */
     protected abstract <T> @NotNull DeleteClause<?> createDelegatedDeleteClause(
             final @NotNull EntityPath<T> entity);
+
+    /**
+     * Returns a new instance of the specified entity type with the specified
+     * variable name.
+     * <p>
+     * Expects a constructor with a single {@code String} argument.
+     * 
+     * @param <T> The entity type
+     * @param entityType The entity type
+     * @param alias The desired entity alias
+     * @return The aliased target entity
+     */
+    protected @NotNull <T extends EntityPath<?>> T createEntity(
+            final @NotNull Class<T> entityType,
+            final @NotNull String alias) {
+        try {
+            return ConstructorUtils.invokeConstructor(entityType, Validate.notNull(alias));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new ExpressionTransformationException(
+                    String.format("Error creating entity of type %s.", entityType),
+                    e);
+        }
+    }
+
+    /**
+     * Returns the variable name of the specified entity.
+     * 
+     * @param entity The entity path
+     * @return The entity path's variable name
+     */
+    protected @NotNull String getEntityAlias(
+            final @NotNull EntityPath<?> entity) {
+        return entity.getMetadata().getName();
+    }
 
     /**
      * Immutable container bean for registered projections keys.

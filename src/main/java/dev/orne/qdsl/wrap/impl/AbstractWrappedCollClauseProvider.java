@@ -23,7 +23,6 @@ package dev.orne.qdsl.wrap.impl;
  */
 
 import java.util.Collection;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -66,22 +65,26 @@ extends AbstractWrappedClauseProvider {
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     @SafeVarargs
     protected AbstractWrappedCollClauseProvider(
-            final @NotNull Class<? extends EntityPath<?>>... supportedEntityTypes) {
-        super(supportedEntityTypes);
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull EntityPath<?>... supportedEntities) {
+        super(targetEntity, supportedEntities);
     }
 
     /**
      * Creates a new instance.
      * 
-     * @param supportedEntityTypes The supported entity types
+     * @param targetEntity The base target entity
+     * @param supportedEntities The supported base entities
      */
     protected AbstractWrappedCollClauseProvider(
-            final @NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes) {
-        super(supportedEntityTypes);
+            final @NotNull EntityPath<?> targetEntity,
+            final @NotNull Collection<EntityPath<?>> supportedEntities) {
+        super(targetEntity, supportedEntities);
     }
 
     /**
@@ -130,9 +133,11 @@ extends AbstractWrappedClauseProvider {
      */
     protected <T> @NotNull WrappedCollQueryClause<T> createQueryClause(
             final @NotNull EntityPath<T> entity) {
+        @SuppressWarnings("unchecked")
+        final EntityPath<T> target = (EntityPath<T>) getTargetEntity(entity);
         return new WrappedCollQueryClause<>(
                 createTransformerForAlias(entity),
-                entity,
+                target,
                 getQueryEngine(),
                 getValues(entity));
     }

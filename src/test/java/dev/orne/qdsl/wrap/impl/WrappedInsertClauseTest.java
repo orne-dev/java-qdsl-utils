@@ -44,6 +44,7 @@ import com.querydsl.core.dml.DeleteClause;
 import com.querydsl.core.dml.InsertClause;
 import com.querydsl.core.types.Constant;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.FactoryExpression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.SubQueryExpression;
@@ -239,6 +240,43 @@ extends WrappedStoreClauseTest {
         final StoredValue<?> value = TestTypes.randomStoredValue();
         final Path<?> path = value.getPath();
         final Expression<?> projection = Projections.tuple(value.getValue());
+        final StoredValues expected = StoredValues.with(value);
+        final WrappedInsertClause clause = getClause();
+        clause.columns(path);
+        final StoredValues result = clause.projectionToStoredValues(projection);
+        assertEquals(expected, result);
+    }
+
+    /**
+     * Unit test for {@link WrappedInsertClause#projectionToStoredValues(Expression)}.
+     */
+    @Test
+    void testProjectionToStoredValuesOneColumnTupleMultiple() {
+        final Expression<?> expr1 = TestTypes.randomExpression();
+        final Expression<?> expr2 = TestTypes.randomExpression();
+        final Expression<?> projection = Projections.tuple(expr1, expr2);
+        final Path<?> path = mock(Path.class);
+        willReturn(projection.getType()).given(path).getType();
+        final StoredValue<?> value = StoredValue.ofUntyped(path, projection);
+        final StoredValues expected = StoredValues.with(value);
+        final WrappedInsertClause clause = getClause();
+        clause.columns(path);
+        final StoredValues result = clause.projectionToStoredValues(projection);
+        assertEquals(expected, result);
+    }
+
+    /**
+     * Unit test for {@link WrappedInsertClause#projectionToStoredValues(Expression)}.
+     */
+    @Test
+    void testProjectionToStoredValuesOneColumnProjection() {
+        final Expression<?> expr1 = TestTypes.randomExpression();
+        final Expression<?> expr2 = TestTypes.randomExpression();
+        final Path<?> path = TestTypes.randomPath();
+        final FactoryExpression<?> projection = mock(FactoryExpression.class);
+        willReturn(Arrays.asList(expr1, expr2)).given(projection).getArgs();
+        willReturn(path.getType()).given(projection).getType();
+        final StoredValue<?> value = StoredValue.ofUntyped(path, projection);
         final StoredValues expected = StoredValues.with(value);
         final WrappedInsertClause clause = getClause();
         clause.columns(path);

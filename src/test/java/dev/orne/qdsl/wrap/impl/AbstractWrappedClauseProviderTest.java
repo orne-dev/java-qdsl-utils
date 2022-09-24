@@ -26,9 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -71,63 +70,81 @@ import dev.orne.qdsl.wrap.impl.transform.ChainedExpressionTransformer;
 class AbstractWrappedClauseProviderTest {
 
     /**
-     * Unit test for {@link AbstractWrappedClauseProvider#AbstractWrappedClauseProvider(Class...)}.
+     * Unit test for {@link AbstractWrappedClauseProvider#AbstractWrappedClauseProvider(EntityPath, EntityPath...)}.
      */
     @Test
     void testVarargsConstructor() {
         assertThrows(NullPointerException.class, () -> {
-            new TestProvider((Class<? extends EntityPath<?>>[]) null);
+            new TestProvider(null, QEntity2.base);
+        });
+        assertThrows(NullPointerException.class, () -> {
+            new TestProvider(QTargetEntity.base, (EntityPath<?>[]) null);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(QEntity.class, null, QEntity2.class);
+            new TestProvider(QTargetEntity.base, QEntity.base, null, QEntity2.base);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider();
+            new TestProvider(QTargetEntity.base);
         });
-        AbstractWrappedClauseProvider result = new TestProvider(QEntity.class);
-        assertNotNull(result.getSupportedEntityTypes());
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(1, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
+        AbstractWrappedClauseProvider result = new TestProvider(QTargetEntity.base, QEntity.base);
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertNotNull(result.getBaseEntities());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(1, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
-        result = new TestProvider(QEntity.class, QEntity2.class);
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(2, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity2.class));
+        result = new TestProvider(QTargetEntity.base, QEntity.base, QEntity2.base);
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(2, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
+        assertTrue(result.getBaseEntities().containsKey(QEntity2.class));
+        assertSame(QEntity2.base, result.getBaseEntities().get(QEntity2.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
     }
 
     /**
-     * Unit test for {@link AbstractWrappedClauseProvider#AbstractWrappedClauseProvider(Set)}.
+     * Unit test for {@link AbstractWrappedClauseProvider#AbstractWrappedClauseProvider(EntityPath, Collection)}.
      */
     @Test
-    void testSetConstructor() {
+    void testCollectionConstructor() {
         assertThrows(NullPointerException.class, () -> {
-            new TestProvider((Set<Class<? extends EntityPath<?>>>) null);
+            new TestProvider(null, Arrays.asList(QEntity.base));
+        });
+        assertThrows(NullPointerException.class, () -> {
+            new TestProvider(QTargetEntity.base, (Collection<EntityPath<?>>) null);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(new HashSet<>(Arrays.asList(QEntity.class, null, QEntity2.class)));
+            new TestProvider(QTargetEntity.base, Arrays.asList(QEntity.base, null, QEntity2.base));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new TestProvider(Collections.emptySet());
+            new TestProvider(QTargetEntity.base, Collections.emptyList());
         });
         AbstractWrappedClauseProvider result = new TestProvider(
-                new HashSet<>(Arrays.asList(QEntity.class)));
-        assertNotNull(result.getSupportedEntityTypes());
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(1, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
+                QTargetEntity.base,
+                Arrays.asList(QEntity.base));
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertNotNull(result.getBaseEntities());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(1, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
         result = new TestProvider(
-                new HashSet<>(Arrays.asList(QEntity.class, QEntity2.class)));
-        assertFalse(result.getSupportedEntityTypes().isEmpty());
-        assertEquals(2, result.getSupportedEntityTypes().size());
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity.class));
-        assertTrue(result.getSupportedEntityTypes().contains(QEntity2.class));
+                QTargetEntity.base,
+                Arrays.asList(QEntity.base, QEntity2.base));
+        assertSame(QTargetEntity.base, result.getTargetEntity());
+        assertFalse(result.getBaseEntities().isEmpty());
+        assertEquals(2, result.getBaseEntities().size());
+        assertTrue(result.getBaseEntities().containsKey(QEntity.class));
+        assertSame(QEntity.base, result.getBaseEntities().get(QEntity.class));
+        assertTrue(result.getBaseEntities().containsKey(QEntity2.class));
+        assertSame(QEntity2.base, result.getBaseEntities().get(QEntity2.class));
         assertNotNull(result.getProjections());
         assertTrue(result.getProjections().isEmpty());
     }
@@ -137,10 +154,10 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testSupports() {
-        AbstractWrappedClauseProvider result = new TestProvider(QEntity.class);
+        AbstractWrappedClauseProvider result = new TestProvider(QTargetEntity.base, QEntity.base);
         assertTrue(result.supports(QEntity.class));
         assertFalse(result.supports(QEntity2.class));
-        result = new TestProvider(QEntity.class, QEntity2.class);
+        result = new TestProvider(QTargetEntity.base, QEntity.base, QEntity2.base);
         assertTrue(result.supports(QEntity.class));
         assertTrue(result.supports(QEntity2.class));
     }
@@ -150,7 +167,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testSetProyection() {
-        final AbstractWrappedClauseProvider provider = new TestProvider(QEntity.class);
+        final AbstractWrappedClauseProvider provider = new TestProvider(QTargetEntity.base, QEntity.base);
         final ProjectionType customType = mock(ProjectionType.class);
         given(customType.getCode()).willReturn("mock type");
         @SuppressWarnings("unchecked")
@@ -182,7 +199,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testGetProyection() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         willReturn(QEntity.base).given(provider).getBaseEntity(QEntity.class);
         willReturn(QEntity2.base).given(provider).getBaseEntity(QEntity2.class);
         final ProjectionType customType = mock(ProjectionType.class);
@@ -305,19 +322,79 @@ class AbstractWrappedClauseProviderTest {
     }
 
     /**
+     * Unit test for {@link AbstractWrappedClauseProvider#getTargetEntity(EntityPath)}.
+     */
+    @Test
+    void testGetTargetEntity_Entity() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        final EntityPath<?> result = provider.getTargetEntity(new QEntity("alias"));
+        assertEquals(QTargetEntity.class, result.getClass());
+        assertEquals(new QTargetEntity("alias"), result);
+        assertThrows(NullPointerException.class, () -> {
+            provider.getTargetEntity((EntityPath<?>) null);
+        });
+    }
+
+    /**
+     * Unit test for {@link AbstractWrappedClauseProvider#getTargetEntity(String)}.
+     */
+    @Test
+    void testGetTargetEntity_String() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        final EntityPath<?> result = provider.getTargetEntity("alias");
+        assertEquals(QTargetEntity.class, result.getClass());
+        assertEquals(new QTargetEntity("alias"), result);
+        assertThrows(NullPointerException.class, () -> {
+            provider.getTargetEntity((String) null);
+        });
+    }
+
+    /**
+     * Unit test for {@link AbstractWrappedClauseProvider#getBaseEntity(Class)}.
+     */
+    @Test
+    void testGetBaseEntity() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        assertSame(QEntity.base, provider.getBaseEntity(QEntity.class));
+        assertThrows(EntityPathNotSupportedException.class, () -> {
+            provider.getBaseEntity(QEntity2.class);
+        });
+    }
+
+    /**
+     * Unit test for {@link AbstractWrappedClauseProvider#getEntityAlias(EntityPath)}.
+     */
+    @Test
+    void testGetEntityAlias() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        final QEntity alias = new QEntity("alias");
+        assertEquals("alias", provider.getEntityAlias(alias));
+    }
+
+    /**
+     * Unit test for {@link AbstractWrappedClauseProvider#createEntity(Class, String)}.
+     */
+    @Test
+    void testCreateEntity() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        assertEquals(new QTargetEntity("alias"), provider.createEntity(QTargetEntity.class, "alias"));
+        assertThrows(ExpressionTransformationException.class, () -> {
+            provider.createEntity(QEntity.class, "alias");
+        });
+    }
+
+    /**
      * Unit test for {@link AbstractWrappedClauseProvider#createAliasRemover(EntityPath)}.
      */
     @Test
     void testCreateAliasRemover() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
-        willReturn(QEntity.base).given(provider).getBaseEntity(QEntity.class);
-        willReturn(QEntity2.base).given(provider).getBaseEntity(QEntity2.class);
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base, QEntity2.base));
         final QEntity alias = new QEntity("alias");
         final QEntity2 alias2 = new QEntity2("alias2");
         Visitor<Expression<?>, ?> result = provider.createAliasRemover(QEntity.base);
         assertNotNull(result);
         assertSame(NopReplaceVisitor.INSTANCE, result);
-        result = provider.createAliasRemover(QEntity.base);
+        result = provider.createAliasRemover(QEntity2.base);
         assertNotNull(result);
         assertSame(NopReplaceVisitor.INSTANCE, result);
         result = provider.createAliasRemover(alias);
@@ -337,27 +414,25 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testCreateAliasRestorer() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
-        willReturn(QEntity.base).given(provider).getBaseEntity(QEntity.class);
-        willReturn(QEntity2.base).given(provider).getBaseEntity(QEntity2.class);
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base, QEntity2.base));
         final QEntity alias = new QEntity("alias");
         final QEntity2 alias2 = new QEntity2("alias2");
         Visitor<Expression<?>, ?> result = provider.createAliasRestorer(QEntity.base);
         assertNotNull(result);
         assertSame(NopReplaceVisitor.INSTANCE, result);
-        result = provider.createAliasRestorer(QEntity.base);
+        result = provider.createAliasRestorer(QEntity2.base);
         assertNotNull(result);
         assertSame(NopReplaceVisitor.INSTANCE, result);
         result = provider.createAliasRestorer(alias);
         assertNotNull(result);
         EntityAliasReplacer tresult = assertInstanceOf(EntityAliasReplacer.class, result);
-        assertEquals(QEntity.base, tresult.getSource());
-        assertEquals(alias, tresult.getTarget());
+        assertEquals(QTargetEntity.base, tresult.getSource());
+        assertEquals(new QTargetEntity("alias"), tresult.getTarget());
         result = provider.createAliasRestorer(alias2);
         assertNotNull(result);
         tresult = assertInstanceOf(EntityAliasReplacer.class, result);
-        assertEquals(QEntity2.base, tresult.getSource());
-        assertEquals(alias2, tresult.getTarget());
+        assertEquals(QTargetEntity.base, tresult.getSource());
+        assertEquals(new QTargetEntity("alias2"), tresult.getTarget());
     }
 
     /**
@@ -365,18 +440,16 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testCreateTransformerForAlias() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final ExpressionTransformer base = mock(ExpressionTransformer.class);
         final ReplaceVisitor<?> remover = mock(ReplaceVisitor.class);
         final ReplaceVisitor<?> restorer = mock(ReplaceVisitor.class);
-        willReturn(QEntity.base).given(provider).getBaseEntity(QEntity.class);
         willReturn(base).given(provider).getTransformer(any(QEntity.class));
         willReturn(remover).given(provider).createAliasRemover(any(QEntity.class));
         willReturn(restorer).given(provider).createAliasRestorer(any(QEntity.class));
         ExpressionTransformer result = provider.createTransformerForAlias(QEntity.base);
         assertNotNull(result);
         assertSame(base, result);
-        then(provider).should(times(1)).getBaseEntity(QEntity.class);
         then(provider).should(times(1)).getTransformer(QEntity.base);
         then(provider).should(never()).createAliasRemover(any(QEntity.class));
         then(provider).should(never()).createAliasRestorer(any(QEntity.class));
@@ -388,10 +461,29 @@ class AbstractWrappedClauseProviderTest {
         assertSame(remover, cresult.getVisitors().get(0));
         assertSame(base, cresult.getVisitors().get(1));
         assertSame(restorer, cresult.getVisitors().get(2));
-        then(provider).should(times(2)).getBaseEntity(QEntity.class);
         then(provider).should(times(1)).getTransformer(alias);
         then(provider).should(times(1)).createAliasRemover(alias);
         then(provider).should(times(1)).createAliasRestorer(alias);
+    }
+
+    /**
+     * Unit test for {@link AbstractWrappedClauseProvider#createTransformerForAlias(EntityPath)}.
+     */
+    @Test
+    void testCreateTransformerForAlias_Real() {
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
+        final ExpressionTransformer base = mock(ExpressionTransformer.class);
+        willReturn(base).given(provider).getTransformer(any(QEntity.class));
+        willReturn(QTargetEntity.base).given(base).visit(eq(QEntity.base), any());
+        final QEntity alias = new QEntity("alias");
+        final ExpressionTransformer transformer = provider.createTransformerForAlias(alias);
+        assertNotNull(transformer);
+        final QTargetEntity expected = new QTargetEntity("alias");
+        final Expression<?> result = transformer.visit(alias, null);
+        assertEquals(expected.getClass(), result.getClass());
+        assertEquals(expected, result);
+        then(provider).should(times(1)).getTransformer(alias);
+        then(base).should(times(1)).visit(eq(QTargetEntity.base), any());
     }
 
     /**
@@ -399,7 +491,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testApplyAlias() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         final EntityPath<?> entity = mock(EntityPath.class);
         final ReplaceVisitor<?> setter = mock(ReplaceVisitor.class);
         willReturn(setter).given(provider).createAliasRestorer(entity);
@@ -424,7 +516,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testInsert() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         assertThrows(NullPointerException.class, () -> {
             provider.insert(null);
         });
@@ -451,7 +543,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testUpdate() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         assertThrows(NullPointerException.class, () -> {
             provider.update(null);
         });
@@ -478,7 +570,7 @@ class AbstractWrappedClauseProviderTest {
      */
     @Test
     void testDelete() {
-        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QEntity.class));
+        final AbstractWrappedClauseProvider provider = spy(new TestProvider(QTargetEntity.base, QEntity.base));
         assertThrows(NullPointerException.class, () -> {
             provider.delete(null);
         });
@@ -502,16 +594,11 @@ class AbstractWrappedClauseProviderTest {
 
     private static class TestProvider
     extends AbstractWrappedClauseProvider {
-        @SafeVarargs
-        public TestProvider(@NotNull Class<? extends EntityPath<?>>... supportedEntityTypes) {
-            super(supportedEntityTypes);
+        public TestProvider(@NotNull EntityPath<?> targetEntity, @NotNull EntityPath<?>... supportedEntities) {
+            super(targetEntity, supportedEntities);
         }
-        public TestProvider(@NotNull Set<Class<? extends EntityPath<?>>> supportedEntityTypes) {
-            super(supportedEntityTypes);
-        }
-        @Override
-        protected <T extends EntityPath<?>> T getBaseEntity(@NotNull Class<T> entityType) {
-            throw new AssertionError("Method call not mocked");
+        public TestProvider(@NotNull EntityPath<?> targetEntity, @NotNull Collection<EntityPath<?>> supportedEntities) {
+            super(targetEntity, supportedEntities);
         }
         @Override
         protected ExpressionTransformer getTransformer(@NotNull EntityPath<?> entity) {
@@ -556,6 +643,19 @@ class AbstractWrappedClauseProviderTest {
             super(path.getType(), path.getMetadata());
         }
         public QEntity2(PathMetadata metadata) {
+            super(BeanType.class, metadata);
+        }
+    }
+    public static class QTargetEntity extends EntityPathBase<BeanType> {
+        private static final long serialVersionUID = 1L;
+        public static final QTargetEntity base = new QTargetEntity("base");
+        public QTargetEntity(String variable) {
+            super(BeanType.class, PathMetadataFactory.forVariable(variable));
+        }
+        public QTargetEntity(Path<? extends BeanType> path) {
+            super(path.getType(), path.getMetadata());
+        }
+        public QTargetEntity(PathMetadata metadata) {
             super(BeanType.class, metadata);
         }
     }
